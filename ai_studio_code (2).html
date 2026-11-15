@@ -1,0 +1,3750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GUI AND CHILL — Personal Cinema</title>
+  
+  <!-- Modern Typography (Inter) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       1. DESIGN VARIABLES & COLOR PALETTE
+       ========================================================================== */
+    :root {
+      color-scheme: dark;
+      --bg-main: #08090D;
+      --bg-secondary: #11141C;
+      --bg-card: #151824;
+      --bg-card-hover: #1E2333;
+      --bg-glass: rgba(17, 20, 28, 0.85);
+      
+      --accent-purple: #8B5CF6;
+      --accent-purple-glow: rgba(139, 92, 246, 0.45);
+      --accent-blue: #38BDF8;
+      --accent-blue-glow: rgba(56, 189, 248, 0.35);
+      
+      --text-main: #FFFFFF;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(139, 92, 246, 0.4);
+      
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      
+      --transition-smooth: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.5;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(circle at 15% 10%, rgba(139, 92, 246, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 85% 25%, rgba(56, 189, 248, 0.08) 0%, transparent 40%);
+      background-attachment: fixed;
+    }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-main); }
+    ::-webkit-scrollbar-thumb { background: #252b3b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-purple); }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      background: transparent;
+      transition: var(--transition-smooth);
+    }
+
+    /* ==========================================================================
+       2. NAVBAR & ADVANCED SEARCH
+       ========================================================================== */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 76px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4%;
+      transition: var(--transition-smooth);
+      background: linear-gradient(180deg, rgba(8, 9, 13, 0.95) 0%, rgba(8, 9, 13, 0.6) 80%, transparent 100%);
+    }
+
+    .navbar.scrolled {
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      height: 70px;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+    }
+
+    .brand-container {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .brand-logo-wrapper {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: 0 0 16px var(--accent-purple-glow);
+      border: 2px solid var(--accent-purple);
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-smooth);
+    }
+
+    .brand-container:hover .brand-logo-wrapper {
+      transform: scale(1.06);
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 22px var(--accent-blue-glow);
+    }
+
+    .brand-avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .brand-monogram {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #FFFFFF;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-title {
+      font-size: 1.28rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      background: linear-gradient(90deg, #FFFFFF 0%, #D8B4FE 60%, var(--accent-blue) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.15;
+    }
+
+    .brand-sub {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 2.5px;
+      color: var(--accent-blue);
+      text-transform: uppercase;
+      -webkit-text-fill-color: var(--accent-blue);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      list-style: none;
+    }
+
+    .nav-item {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      position: relative;
+      padding: 6px 0;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .nav-item:hover, .nav-item.active {
+      color: var(--text-main);
+    }
+
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+      border-radius: var(--radius-full);
+      box-shadow: 0 0 8px var(--accent-purple);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .search-bar-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      padding: 10px 40px 10px 42px;
+      color: var(--text-main);
+      font-size: 0.92rem;
+      width: 240px;
+      transition: var(--transition-smooth);
+      backdrop-filter: blur(12px);
+    }
+
+    .search-input:focus {
+      width: 320px;
+      background: rgba(17, 20, 28, 0.95);
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 20px var(--accent-purple-glow);
+      outline: none;
+    }
+
+    .search-icon-nav {
+      position: absolute;
+      left: 14px;
+      color: var(--text-secondary);
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-spinner {
+      position: absolute;
+      right: 14px;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: var(--accent-purple);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .search-clear-btn {
+      position: absolute;
+      right: 14px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: none;
+      line-height: 1;
+    }
+    .search-clear-btn:hover { color: #FFF; }
+
+    .nav-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      position: relative;
+    }
+
+    .nav-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--accent-purple);
+      transform: translateY(-2px);
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #10B981;
+      box-shadow: 0 0 8px #10B981;
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      border: 1.5px solid var(--bg-main);
+    }
+
+    .hamburger-btn { display: none; }
+
+    /* Mobile Drawer */
+    .mobile-drawer {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 290px;
+      height: 100vh;
+      background: var(--bg-secondary);
+      z-index: 1100;
+      padding: 30px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      border-left: 1px solid var(--border-subtle);
+      box-shadow: -10px 0 40px rgba(0,0,0,0.8);
+      transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .mobile-drawer.open { right: 0; }
+
+    .drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 1050;
+      display: none;
+    }
+    .drawer-overlay.active { display: block; }
+
+    /* ==========================================================================
+       3. HERO SPOTLIGHT SECTION
+       ========================================================================== */
+    .hero-container {
+      position: relative;
+      width: 100%;
+      min-height: 82vh;
+      max-height: 850px;
+      display: flex;
+      align-items: flex-end;
+      padding: 0 4% 80px 4%;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .hero-backdrop {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 20%;
+      z-index: 1;
+      filter: brightness(0.72) contrast(1.1);
+      transform: scale(1.02);
+      transition: transform 7s ease-out;
+    }
+
+    .hero-container:hover .hero-backdrop { transform: scale(1.05); }
+
+    .hero-vignette {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      background: 
+        linear-gradient(180deg, rgba(8, 9, 13, 0.4) 0%, transparent 40%),
+        linear-gradient(90deg, rgba(8, 9, 13, 0.95) 0%, rgba(8, 9, 13, 0.75) 45%, rgba(8, 9, 13, 0.2) 75%, transparent 100%),
+        linear-gradient(0deg, var(--bg-main) 0%, rgba(8, 9, 13, 0.8) 25%, transparent 60%);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 3;
+      max-width: 720px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      animation: heroFadeIn 0.8s ease-out;
+    }
+
+    @keyframes heroFadeIn {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .hero-pill {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .hero-pill-featured {
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+      color: #FFFFFF;
+      box-shadow: 0 0 14px var(--accent-purple-glow);
+    }
+
+    .hero-pill-type {
+      background: rgba(255, 255, 255, 0.12);
+      color: #E2E8F0;
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .hero-title {
+      font-size: clamp(2.4rem, 5vw, 4.2rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -1px;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+    }
+
+    .hero-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.95rem;
+      color: #CBD5E1;
+      font-weight: 500;
+      flex-wrap: wrap;
+    }
+
+    .rating-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #FBBF24;
+      font-weight: 700;
+    }
+
+    .hero-overview {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      max-width: 650px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.6);
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-purple) 0%, #7C3AED 100%);
+      color: #FFFFFF;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 14px 28px;
+      border-radius: var(--radius-md);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 20px var(--accent-purple-glow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 26px rgba(139, 92, 246, 0.6);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #FFFFFF;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 14px 24px;
+      border-radius: var(--radius-md);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .btn-icon-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+    }
+
+    .btn-icon-circle:hover {
+      background: rgba(255, 255, 255, 0.22);
+      transform: scale(1.08);
+      border-color: var(--accent-purple);
+    }
+
+    .btn-icon-circle.active {
+      background: var(--accent-purple);
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 16px var(--accent-purple-glow);
+    }
+
+    /* ==========================================================================
+       4. CAROUSELS & POSTER CARDS (WITH CONTINUE WATCHING BAR)
+       ========================================================================== */
+    .main-content {
+      padding: 0 4% 80px 4%;
+      display: flex;
+      flex-direction: column;
+      gap: 48px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .section-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-title-bar {
+      width: 4px;
+      height: 24px;
+      background: linear-gradient(180deg, var(--accent-purple), var(--accent-blue));
+      border-radius: var(--radius-full);
+      box-shadow: 0 0 10px var(--accent-purple-glow);
+    }
+
+    .section-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      letter-spacing: -0.3px;
+    }
+
+    .carousel-container {
+      position: relative;
+      overflow: hidden;
+      margin: 0 -12px;
+      padding: 12px;
+    }
+
+    .carousel-track {
+      display: flex;
+      gap: 18px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding-bottom: 16px;
+      scrollbar-width: none;
+    }
+    .carousel-track::-webkit-scrollbar { display: none; }
+
+    .carousel-btn {
+      position: absolute;
+      top: calc(50% - 24px);
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: rgba(17, 20, 28, 0.9);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border-subtle);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      opacity: 0;
+      pointer-events: none;
+      transition: var(--transition-smooth);
+    }
+
+    .carousel-container:hover .carousel-btn {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .carousel-btn:hover {
+      background: var(--accent-purple);
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 18px var(--accent-purple-glow);
+      transform: scale(1.12);
+    }
+
+    .carousel-btn.prev { left: 18px; }
+    .carousel-btn.next { right: 18px; }
+
+    .media-card {
+      position: relative;
+      flex: 0 0 200px;
+      height: 300px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    @media (min-width: 1440px) {
+      .media-card { flex: 0 0 220px; height: 330px; }
+    }
+
+    .media-card:hover {
+      transform: translateY(-8px) scale(1.03);
+      border-color: var(--border-glow);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7), 0 0 24px var(--accent-purple-glow);
+      z-index: 15;
+    }
+
+    .card-poster {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+      background-color: #1a1e2b;
+    }
+    .media-card:hover .card-poster { transform: scale(1.06); }
+
+    .card-badge-type {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(8, 9, 13, 0.88);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      letter-spacing: 0.8px;
+      z-index: 2;
+    }
+    .card-badge-type.badge-movie { color: var(--accent-blue); border-color: rgba(56, 189, 248, 0.4); }
+    .card-badge-type.badge-tv { color: var(--accent-purple); border-color: rgba(139, 92, 246, 0.4); }
+    .card-badge-type.badge-anime { color: #F59E0B; border-color: rgba(245, 158, 11, 0.4); }
+
+    .card-badge-rating {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 7px;
+      border-radius: 6px;
+      background: rgba(8, 9, 13, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      color: #FBBF24;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      z-index: 2;
+    }
+
+    /* Continue Watching Progress Bar */
+    .continue-progress-wrap {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.15);
+      z-index: 4;
+    }
+
+    .continue-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+      box-shadow: 0 0 8px var(--accent-purple-glow);
+    }
+
+    .continue-dismiss-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(8, 9, 13, 0.85);
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      border: 1px solid var(--border-subtle);
+      z-index: 6;
+      opacity: 0;
+      transition: var(--transition-smooth);
+    }
+    .media-card:hover .continue-dismiss-btn { opacity: 1; }
+    .continue-dismiss-btn:hover {
+      background: #EF4444;
+      border-color: #EF4444;
+      transform: scale(1.1);
+    }
+
+    .card-hover-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 40px 14px 14px 14px;
+      background: linear-gradient(0deg, #090B10 0%, rgba(9, 11, 16, 0.95) 60%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transform: translateY(30px);
+      opacity: 0;
+      transition: var(--transition-smooth);
+      z-index: 3;
+    }
+
+    .media-card:hover .card-hover-overlay {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .card-actions-quick {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .quick-play-btn {
+      flex: 1;
+      height: 32px;
+      background: var(--accent-purple);
+      color: #FFFFFF;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+    .quick-play-btn:hover {
+      background: #7C3AED;
+      box-shadow: 0 0 12px var(--accent-purple-glow);
+    }
+
+    .quick-fav-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border-subtle);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .quick-fav-btn:hover { background: rgba(255, 255, 255, 0.2); }
+    .quick-fav-btn.active { color: var(--accent-purple); border-color: var(--accent-purple); }
+
+    .poster-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      text-align: center;
+      background: linear-gradient(145deg, #181c2b, #0e111a);
+      color: var(--text-secondary);
+    }
+
+    /* ==========================================================================
+       5. GRID VIEW & SEARCH RESULTS
+       ========================================================================== */
+    .grid-view-container {
+      padding: 100px 4% 60px 4%;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      min-height: 80vh;
+    }
+
+    .grid-view-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 22px;
+    }
+
+    .filter-tabs {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-tab-btn {
+      padding: 7px 16px;
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .filter-tab-btn:hover { color: #FFFFFF; background: rgba(255, 255, 255, 0.12); }
+    .filter-tab-btn.active {
+      background: var(--accent-purple);
+      color: #FFFFFF;
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 12px var(--accent-purple-glow);
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 20px;
+      gap: 18px;
+      color: var(--text-secondary);
+    }
+    .empty-icon { font-size: 3.5rem; color: var(--text-muted); }
+    .empty-title { font-size: 1.5rem; font-weight: 700; color: #FFFFFF; }
+
+    /* ==========================================================================
+       6. WATCH PLAYER & SEASON SELECTOR (FIXED DARK DROPDOWN)
+       ========================================================================== */
+    .player-view {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg-main);
+      z-index: 2000;
+      display: none;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .player-view.active { display: flex; }
+
+    .player-header {
+      position: sticky;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 64px;
+      background: rgba(8, 9, 13, 0.95);
+      backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4%;
+      border-bottom: 1px solid var(--border-subtle);
+      z-index: 10;
+    }
+
+    .player-back-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+    }
+    .player-back-btn:hover {
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--accent-purple);
+    }
+
+    .player-header-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      text-align: center;
+      max-width: 60%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .player-stage {
+      width: 100%;
+      max-width: 1400px;
+      margin: 16px auto 30px auto;
+      padding: 0 4%;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .server-switch-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 18px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .server-switch-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .server-pills {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .server-pill-btn {
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition-smooth);
+    }
+
+    .server-pill-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #FFFFFF;
+      transform: translateY(-1px);
+    }
+
+    .server-pill-btn.active {
+      background: var(--accent-purple);
+      border-color: var(--accent-purple);
+      color: #FFFFFF;
+      box-shadow: 0 0 14px var(--accent-purple-glow);
+    }
+
+    .server-dot-indicator {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .player-iframe-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000000;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(139, 92, 246, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .player-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .series-controls-container {
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .series-controls-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .season-selector {
+      background-color: #171b26 !important;
+      color: #FFFFFF !important;
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      border-radius: var(--radius-sm);
+      padding: 9px 18px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+      color-scheme: dark !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+      transition: var(--transition-smooth);
+    }
+
+    .season-selector:hover, .season-selector:focus {
+      border-color: var(--accent-purple) !important;
+      box-shadow: 0 0 14px var(--accent-purple-glow);
+      background-color: #1e2433 !important;
+    }
+
+    .season-selector option {
+      background-color: #11141c !important;
+      color: #FFFFFF !important;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+    }
+
+    .episodes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+      gap: 10px;
+      max-height: 220px;
+      overflow-y: auto;
+      padding-right: 6px;
+    }
+
+    .episode-btn {
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-align: center;
+    }
+    .episode-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #FFFFFF;
+      border-color: var(--accent-purple);
+    }
+    .episode-btn.active {
+      background: var(--accent-purple);
+      color: #FFFFFF;
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 14px var(--accent-purple-glow);
+    }
+
+    .player-details-row {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+
+    /* ==========================================================================
+       7. GC AI — FLOATING ACTION BUTTON & CHAT WINDOW
+       ========================================================================== */
+    .ai-fab {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      height: 52px;
+      padding: 0 20px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(135deg, var(--accent-purple) 0%, #6366F1 50%, var(--accent-blue) 100%);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: 0.4px;
+      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5), 0 0 20px rgba(56, 189, 248, 0.3);
+      z-index: 1200;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      transition: var(--transition-smooth);
+    }
+    .ai-fab:hover {
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 14px 40px rgba(139, 92, 246, 0.7), 0 0 30px rgba(56, 189, 248, 0.5);
+    }
+    .ai-fab-sparkle {
+      display: inline-flex;
+      animation: sparklePulse 2s infinite ease-in-out;
+    }
+    @keyframes sparklePulse {
+      0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.9; }
+      50% { transform: scale(1.2) rotate(15deg); opacity: 1; filter: drop-shadow(0 0 6px #FFF); }
+    }
+
+    /* AI Chat Window */
+    .ai-chat-window {
+      position: fixed;
+      bottom: 92px;
+      right: 28px;
+      width: 450px;
+      max-width: calc(100vw - 32px);
+      height: 650px;
+      max-height: calc(100vh - 120px);
+      background: rgba(13, 16, 24, 0.92);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(139, 92, 246, 0.25);
+      z-index: 1250;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      animation: heroFadeIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .ai-chat-window.open { display: flex; }
+
+    .ai-chat-header {
+      padding: 16px 20px;
+      background: linear-gradient(180deg, rgba(21, 24, 36, 0.95) 0%, rgba(13, 16, 24, 0.85) 100%);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .ai-chat-header-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .ai-avatar-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 0.9rem;
+      box-shadow: 0 0 12px var(--accent-purple-glow);
+    }
+    .ai-title-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+    .ai-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ai-subtitle {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ai-status-indicator {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10B981;
+      box-shadow: 0 0 6px #10B981;
+    }
+    .ai-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ai-icon-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.85rem;
+    }
+    .ai-icon-btn:hover { color: #FFF; background: rgba(255, 255, 255, 0.15); }
+
+    /* Messages List */
+    .ai-chat-messages {
+      flex: 1;
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .ai-msg {
+      display: flex;
+      flex-direction: column;
+      max-width: 90%;
+      animation: heroFadeIn 0.25s ease-out;
+    }
+    .ai-msg.user {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+    .ai-msg.assistant {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+    .ai-bubble {
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      line-height: 1.55;
+    }
+    .ai-msg.user .ai-bubble {
+      background: linear-gradient(135deg, var(--accent-purple) 0%, #6366F1 100%);
+      color: #FFFFFF;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 4px 14px var(--accent-purple-glow);
+    }
+    .ai-msg.assistant .ai-bubble {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      color: #E2E8F0;
+      border-bottom-left-radius: 4px;
+    }
+
+    /* Recommendation Cards inside Chat */
+    .ai-cards-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 12px;
+      width: 100%;
+    }
+    .ai-recom-card {
+      display: flex;
+      gap: 12px;
+      background: rgba(17, 20, 28, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-md);
+      padding: 10px;
+      transition: var(--transition-smooth);
+      position: relative;
+    }
+    .ai-recom-card:hover {
+      border-color: var(--border-glow);
+      background: rgba(25, 30, 44, 0.95);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 16px var(--accent-purple-glow);
+    }
+    .ai-recom-poster {
+      width: 68px;
+      height: 100px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #11141C;
+    }
+    .ai-recom-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-width: 0;
+    }
+    .ai-recom-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #FFF;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .ai-recom-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      margin: 2px 0 4px 0;
+    }
+    .ai-recom-reason {
+      font-size: 0.74rem;
+      color: #CBD5E1;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .ai-recom-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ai-recom-btn-play {
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: var(--accent-purple);
+      color: #FFF;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .ai-recom-btn-play:hover { background: #7C3AED; }
+    .ai-recom-btn-icon {
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+      font-size: 0.72rem;
+      border: 1px solid var(--border-subtle);
+    }
+    .ai-recom-btn-icon:hover { color: #FFF; background: rgba(255, 255, 255, 0.16); }
+
+    /* Quick Prompts Chips */
+    .ai-suggestions-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .ai-suggestion-chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      padding: 6px 12px;
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+    .ai-suggestion-chip:hover {
+      background: rgba(139, 92, 246, 0.2);
+      border-color: var(--accent-purple);
+      color: #FFF;
+    }
+
+    /* Typing Indicator */
+    .ai-typing-indicator {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-md);
+      width: fit-content;
+    }
+    .ai-typing-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-purple);
+      animation: typingWave 1.3s infinite ease-in-out;
+    }
+    .ai-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .ai-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingWave {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-5px); opacity: 1; }
+    }
+
+    /* Chat Input Bar */
+    .ai-chat-input-bar {
+      padding: 14px 18px;
+      background: rgba(17, 20, 28, 0.95);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .ai-input-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .ai-chat-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      padding: 10px 18px;
+      color: #FFFFFF;
+      font-size: 0.88rem;
+      outline: none;
+      transition: var(--transition-smooth);
+    }
+    .ai-chat-input:focus {
+      border-color: var(--accent-purple);
+      background: rgba(21, 24, 36, 0.9);
+      box-shadow: 0 0 14px var(--accent-purple-glow);
+    }
+    .ai-chat-send-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--accent-purple);
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 12px var(--accent-purple-glow);
+    }
+    .ai-chat-send-btn:hover {
+      background: #7C3AED;
+      transform: scale(1.06);
+    }
+    .ai-chat-footer-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      padding: 0 4px;
+    }
+
+    /* ==========================================================================
+       8. MODALS (DETAILS & SETTINGS)
+       ========================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(4, 5, 8, 0.85);
+      backdrop-filter: blur(16px);
+      z-index: 1500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal-backdrop.active { display: flex; }
+
+    .modal-box {
+      position: relative;
+      width: 100%;
+      max-width: 860px;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(139, 92, 246, 0.2);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-banner {
+      position: relative;
+      width: 100%;
+      height: 280px;
+    }
+    .modal-banner-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.65);
+    }
+    .modal-banner-gradient {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(0deg, var(--bg-card) 0%, rgba(21, 24, 36, 0.6) 50%, transparent 100%);
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.6);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border-subtle);
+      z-index: 10;
+    }
+    .modal-close-btn:hover {
+      background: var(--accent-purple);
+      border-color: var(--accent-purple);
+      transform: rotate(90deg);
+    }
+
+    .modal-body {
+      padding: 0 32px 36px 32px;
+      position: relative;
+      margin-top: -60px;
+      display: flex;
+      gap: 28px;
+    }
+
+    .modal-poster-wrap {
+      width: 170px;
+      height: 255px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      flex-shrink: 0;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+      border: 2px solid var(--border-subtle);
+    }
+    .modal-poster-wrap img { width: 100%; height: 100%; object-fit: cover; }
+
+    .modal-info-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding-top: 64px;
+    }
+
+    .modal-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+    .modal-genre-tag {
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-full);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Settings Modal */
+    .settings-modal-box {
+      max-width: 650px;
+      padding: 32px;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .settings-section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 8px;
+    }
+
+    .profile-upload-area {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: var(--radius-md);
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+    }
+
+    .profile-preview-circle {
+      width: 74px;
+      height: 74px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--accent-purple);
+      box-shadow: 0 0 16px var(--accent-purple-glow);
+      flex-shrink: 0;
+    }
+    .file-input-hidden { display: none; }
+
+    .settings-input-text {
+      width: 100%;
+      background: #171b26;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: #FFFFFF;
+      font-size: 0.9rem;
+      color-scheme: dark;
+    }
+
+    .settings-input-text option {
+      background: #11141c;
+      color: #FFFFFF;
+    }
+
+    .toast-container {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 3000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast-msg {
+      background: var(--bg-card);
+      border: 1px solid var(--accent-purple);
+      border-radius: var(--radius-md);
+      padding: 14px 20px;
+      color: #FFFFFF;
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 16px var(--accent-purple-glow);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      pointer-events: auto;
+    }
+
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .hamburger-btn { display: flex; }
+      .search-input { width: 160px; }
+      .search-input:focus { width: 200px; }
+      .hero-title { font-size: 2.2rem; }
+      .modal-body { flex-direction: column; align-items: center; text-align: center; }
+      .modal-info-col { padding-top: 10px; align-items: center; }
+      .modal-tags { justify-content: center; }
+      .ai-chat-window { bottom: 84px; right: 16px; width: calc(100vw - 32px); height: 75vh; }
+      .ai-fab { bottom: 20px; right: 20px; }
+    }
+
+    @media (max-width: 600px) {
+      .brand-sub { display: none; }
+      .cards-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
+      .media-card { flex: 0 0 150px; height: 230px; }
+      .server-switch-bar { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar" id="navbar">
+    <div class="nav-left">
+      <div class="brand-container" id="brandBtn" title="GUI AND CHILL — Home">
+        <div class="brand-logo-wrapper" id="brandLogoWrapper">
+          <span class="brand-monogram" id="brandMonogram">GC</span>
+        </div>
+        <div class="brand-title">
+          GUI AND CHILL
+          <span class="brand-sub">Personal Cinema</span>
+        </div>
+      </div>
+
+      <ul class="nav-links">
+        <li class="nav-item active" data-view="home">Home</li>
+        <li class="nav-item" data-view="movies">Movies</li>
+        <li class="nav-item" data-view="series">TV Shows</li>
+        <li class="nav-item" data-view="anime">Anime</li>
+        <li class="nav-item" data-view="mylist">My List</li>
+        <li class="nav-item" data-view="history">History</li>
+      </ul>
+    </div>
+
+    <div class="nav-right">
+      <div class="search-bar-wrap">
+        <span class="search-icon-nav">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </span>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search movies, shows, anime..." autocomplete="off">
+        <div class="search-spinner" id="searchSpinner"></div>
+        <span class="search-clear-btn" id="searchClearBtn" title="Clear search">✕</span>
+      </div>
+
+      <button class="nav-btn" id="apiStatusBtn" title="Active Streaming Servers">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+        <span class="status-dot" id="statusDot"></span>
+      </button>
+
+      <button class="nav-btn" id="settingsBtn" title="Settings & Servers">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </button>
+
+      <button class="nav-btn hamburger-btn" id="hamburgerBtn" title="Toggle Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <aside class="mobile-drawer" id="mobileDrawer">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <span style="font-weight:800; font-size:1.2rem; color:#FFF;">Menu</span>
+      <button id="closeDrawerBtn" style="color:#FFF; font-size:1.5rem;">✕</button>
+    </div>
+    <ul style="list-style:none; display:flex; flex-direction:column; gap:16px;">
+      <li class="nav-item active" data-view="home">🏠 Home</li>
+      <li class="nav-item" data-view="movies">🎬 Movies</li>
+      <li class="nav-item" data-view="series">📺 TV Shows</li>
+      <li class="nav-item" data-view="anime">⚡ Anime</li>
+      <li class="nav-item" data-view="mylist">❤️ My List</li>
+      <li class="nav-item" data-view="history">🕒 History</li>
+    </ul>
+  </aside>
+
+  <!-- VIEW 1: HOME -->
+  <main id="homeView">
+    <section class="hero-container" id="heroSection">
+      <img src="" alt="Hero Backdrop" class="hero-backdrop" id="heroBackdrop">
+      <div class="hero-vignette"></div>
+
+      <div class="hero-content">
+        <div class="hero-badge-row">
+          <span class="hero-pill hero-pill-featured">Spotlight</span>
+          <span class="hero-pill hero-pill-type" id="heroTypeBadge">Movie</span>
+          <span class="rating-badge" id="heroRatingBadge">★ 8.8</span>
+        </div>
+
+        <h1 class="hero-title" id="heroTitle">Loading...</h1>
+
+        <div class="hero-meta" id="heroMeta">
+          <span id="heroYear">2024</span>
+          <span>•</span>
+          <span id="heroGenres">Action, Sci-Fi</span>
+        </div>
+
+        <p class="hero-overview" id="heroOverview">Preparing cinematic experiences...</p>
+
+        <div class="hero-actions">
+          <button class="btn-primary" id="heroPlayBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            WATCH NOW
+          </button>
+          <button class="btn-secondary" id="heroInfoBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            MORE INFO
+          </button>
+          <button class="btn-icon-circle" id="heroFavBtn" title="Favorites">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Horizontal Categories & Continue Watching Container -->
+    <div class="main-content" id="catalogRowsContainer"></div>
+  </main>
+
+  <!-- VIEW 2: DYNAMIC GRID -->
+  <section class="grid-view-container" id="gridView" style="display: none;">
+    <div class="grid-view-header">
+      <div class="section-title-wrap">
+        <div class="section-title-bar"></div>
+        <h2 class="section-title" id="gridTitle">Results</h2>
+      </div>
+      <div class="filter-tabs" id="gridFilters"></div>
+    </div>
+
+    <div class="cards-grid" id="gridContent"></div>
+
+    <div class="empty-state" id="gridEmptyState" style="display: none;">
+      <div class="empty-icon">🔍</div>
+      <h3 class="empty-title" id="emptyTitle">We couldn't find what you're looking for.</h3>
+      <p id="emptySub">Try searching for another title like Batman, Interstellar, One Piece, or Breaking Bad.</p>
+      <button class="btn-primary" onclick="App.navigateTo('home')">Back to Home</button>
+    </div>
+  </section>
+
+  <!-- VIEW 3: MULTI-SERVER WATCH PLAYER -->
+  <div class="player-view" id="playerView">
+    <div class="player-header">
+      <button class="player-back-btn" id="playerBackBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Back to Browse
+      </button>
+      <div class="player-header-title" id="playerTitle">Now Playing...</div>
+      <div style="display:flex; gap:10px;">
+        <button class="nav-btn" id="playerReloadBtn" title="Reload Stream">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="player-stage">
+      <!-- SERVER SWITCHER BAR -->
+      <div class="server-switch-bar">
+        <div class="server-switch-label">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+          <span>Streaming Server:</span>
+        </div>
+        <div class="server-pills" id="serverPillsContainer"></div>
+      </div>
+
+      <!-- PLAYER IFRAME -->
+      <div class="player-iframe-wrap">
+        <iframe 
+          id="vidrockIframe" 
+          class="player-iframe" 
+          src="" 
+          allowfullscreen 
+          allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+          referrerpolicy="no-referrer">
+        </iframe>
+      </div>
+
+      <!-- SEASON & EPISODE SELECTOR -->
+      <div class="series-controls-container" id="seriesControls" style="display: none;">
+        <div class="series-controls-top">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; color: #FFF;">Season & Episodes</h3>
+            <span id="seriesEpisodeCountBadge" style="font-size:0.75rem; color:var(--text-muted); background:rgba(255,255,255,0.06); padding:3px 8px; border-radius:4px;"></span>
+          </div>
+          <select class="season-selector" id="seasonSelector"></select>
+        </div>
+        <div class="episodes-grid" id="episodesGrid"></div>
+      </div>
+
+      <!-- TITLE INFORMATION -->
+      <div class="player-details-row">
+        <div style="flex: 1; min-width: 300px;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+            <span class="hero-pill hero-pill-type" id="playerTypeBadge">Movie</span>
+            <span class="rating-badge" id="playerRatingBadge">★ 8.5</span>
+            <span id="playerYearBadge" style="color:var(--text-secondary); font-size:0.9rem;">2024</span>
+          </div>
+          <h1 id="playerItemTitle" style="font-size: 1.8rem; font-weight: 800; color: #FFF;">Title</h1>
+          <p id="playerSynopsis" style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.7; margin-top: 12px;"></p>
+        </div>
+        <div>
+          <button class="btn-secondary" id="playerFavToggleBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            Save to My List
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAILS MODAL -->
+  <div class="modal-backdrop" id="detailsModal">
+    <div class="modal-box">
+      <div class="modal-banner">
+        <img src="" alt="" class="modal-banner-img" id="modalBackdrop">
+        <div class="modal-banner-gradient"></div>
+        <button class="modal-close-btn" id="modalCloseBtn">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-poster-wrap">
+          <img src="" alt="" id="modalPoster">
+        </div>
+        <div class="modal-info-col">
+          <div class="modal-tags" id="modalTags"></div>
+          <h2 class="modal-title" id="modalTitle">Title</h2>
+          <div style="display:flex; align-items:center; gap:12px; font-size:0.9rem; color:var(--text-secondary);">
+            <span id="modalYear">2024</span>
+            <span>•</span>
+            <span class="rating-badge" id="modalRating">★ 8.5</span>
+            <span>•</span>
+            <span id="modalType">Movie</span>
+          </div>
+          <p class="modal-desc" id="modalOverview" style="font-size:0.95rem; color:var(--text-secondary); line-height:1.6;"></p>
+          <div style="display:flex; align-items:center; gap:14px; margin-top:10px;">
+            <button class="btn-primary" id="modalPlayBtn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              WATCH NOW
+            </button>
+            <button class="btn-icon-circle" id="modalFavBtn" title="Favorites">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="settings-modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="font-size:1.4rem; font-weight:800; color:#FFF;">Settings & Servers</h2>
+        <button class="modal-close-btn" id="settingsCloseBtn" style="position:static;">✕</button>
+      </div>
+
+      <!-- Personal Logo -->
+      <div>
+        <h3 class="settings-section-title">Personal Logo & Identity</h3>
+        <p style="font-size:0.85rem; color:var(--text-secondary); margin:8px 0 14px 0;">
+          Upload a personal photo to use as your official platform logo in the top-left corner.
+        </p>
+
+        <div class="profile-upload-area">
+          <div class="profile-preview-circle" id="settingsAvatarPreview">
+            <span class="brand-monogram">GC</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <input type="file" id="avatarFileInput" class="file-input-hidden" accept="image/*">
+            <button class="btn-primary" style="padding:8px 16px; font-size:0.85rem;" onclick="document.getElementById('avatarFileInput').click()">
+              Choose Photo
+            </button>
+            <button class="btn-secondary" style="padding:6px 12px; font-size:0.8rem;" id="removeAvatarBtn">
+              Reset to "GC" Monogram
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- GC AI Configuration -->
+      <div>
+        <h3 class="settings-section-title">GC AI — Conversational Intelligence</h3>
+        <p style="font-size:0.82rem; color:var(--text-secondary); margin:6px 0 10px 0;">
+          Select your preferred AI engine for the cinema assistant. Supports real conversation in any language!
+        </p>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-muted);">AI Provider:</label>
+            <select class="settings-input-text" id="aiProviderSelector">
+              <option value="ollama">Ollama (Local LLM - Llama 3 / Mistral)</option>
+              <option value="gemini">Google Gemini API (Cloud - Fast & Multilingual)</option>
+              <option value="openai">OpenAI API (GPT-4o Mini)</option>
+              <option value="fallback">Built-in Semantic Engine (Offline)</option>
+            </select>
+          </div>
+
+          <div id="aiOllamaSettingsBlock">
+            <label style="font-size:0.75rem; color:var(--text-muted);">Ollama URL & Model:</label>
+            <div style="display:flex; gap:8px;">
+              <input type="text" class="settings-input-text" id="aiOllamaUrlInput" value="http://localhost:11434" placeholder="http://localhost:11434" style="flex:2;">
+              <input type="text" class="settings-input-text" id="aiModelNameInput" value="llama3.2" placeholder="llama3.2" style="flex:1;">
+            </div>
+          </div>
+
+          <div id="aiCloudKeyBlock" style="display:none;">
+            <label style="font-size:0.75rem; color:var(--text-muted);">API Key (Stored locally in your browser):</label>
+            <input type="password" class="settings-input-text" id="aiApiKeyInput" placeholder="Enter Gemini or OpenAI API Key">
+          </div>
+
+          <div style="display:flex; gap:10px;">
+            <button class="btn-secondary" style="flex:1; font-size:0.82rem;" id="aiTestConnectionBtn">Test Connection</button>
+            <button class="btn-secondary" style="flex:1; font-size:0.82rem;" id="aiSaveConfigBtn">Save AI Settings</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Default Server Configuration -->
+      <div>
+        <h3 class="settings-section-title">Default Streaming Server</h3>
+        <p style="font-size:0.82rem; color:var(--text-secondary); margin:6px 0 10px 0;">
+          Choose which provider the player should attempt to stream from first:
+        </p>
+        <select class="settings-input-text" id="defaultServerSelector" style="cursor:pointer;">
+          <option value="vidrock">VidRock (Official - vidrock.to)</option>
+          <option value="vidlink">VidLink (Fast - vidlink.pro)</option>
+          <option value="vidsrc_cc">VidSrc PRO (Subtitles - vidsrc.cc)</option>
+          <option value="vidsrc_to">VidSrc.to (Stable - vidsrc.to)</option>
+          <option value="vidsrc_xyz">VidSrc.xyz (Backup - vidsrc.xyz)</option>
+        </select>
+      </div>
+
+      <!-- Data Management -->
+      <div>
+        <h3 class="settings-section-title">Local Storage & Privacy</h3>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+          <button class="btn-secondary" style="font-size:0.8rem; color:#EF4444;" id="clearAiChatBtn">Clear AI Chat History</button>
+          <button class="btn-secondary" style="font-size:0.8rem; color:#EF4444;" id="clearContinueBtn">Clear Continue Watching</button>
+          <button class="btn-secondary" style="font-size:0.8rem; color:#EF4444;" id="clearHistoryBtn">Clear History</button>
+          <button class="btn-secondary" style="font-size:0.8rem; color:#EF4444;" id="clearFavoritesBtn">Clear My List</button>
+          <button class="btn-secondary" style="font-size:0.8rem;" id="clearCacheBtn">Reset All Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       GC AI — FLOATING BUTTON & CHAT WINDOW
+       ========================================================================== */
+  -->
+  <button class="ai-fab" id="aiFabBtn" title="Open GC AI Movie Assistant">
+    <span class="ai-fab-sparkle">✨</span>
+    <span>GC AI</span>
+  </button>
+
+  <div class="ai-chat-window" id="aiChatWindow">
+    <div class="ai-chat-header">
+      <div class="ai-chat-header-info">
+        <div class="ai-avatar-badge">GC</div>
+        <div class="ai-title-wrap">
+          <div class="ai-title">
+            <span>GC AI</span>
+            <span style="font-size:0.75rem; background:rgba(139,92,246,0.25); color:var(--accent-purple); padding:1px 6px; border-radius:4px;">Assistant</span>
+          </div>
+          <div class="ai-subtitle">
+            <span class="ai-status-indicator" id="aiStatusIndicator"></span>
+            <span id="aiStatusText">AI Ready</span>
+            <span>•</span>
+            <span id="aiActiveServerTag">VidRock</span>
+          </div>
+        </div>
+      </div>
+      <div class="ai-header-actions">
+        <button class="ai-icon-btn" id="aiNewChatBtn" title="New Conversation">🔄</button>
+        <button class="ai-icon-btn" id="aiCloseChatBtn" title="Close Chat">✕</button>
+      </div>
+    </div>
+
+    <div class="ai-chat-messages" id="aiChatMessages">
+      <!-- Dynamic messages injected here -->
+      <div class="ai-msg assistant">
+        <div class="ai-bubble">
+          Hey! I'm <strong>GC AI</strong> 👋<br>
+          I can speak <strong>any language</strong> you prefer (Portuguese, English, Spanish, etc.) and talk about cinema, directors, theories, or find the perfect movie, TV show, or anime for your mood.
+          
+          <div class="ai-suggestions-wrap" id="aiSuggestionsWrap">
+            <span class="ai-suggestion-chip" data-prompt="Olá! Podes recomendar-me um bom filme de terror psicológico com reviravoltas?">🇵🇹 Terror psicológico com reviravoltas</span>
+            <span class="ai-suggestion-chip" data-prompt="A gripping crime thriller series like Prison Break">🇺🇸 Series like Prison Break</span>
+            <span class="ai-suggestion-chip" data-prompt="Recomenda-me um anime de ação com combates épicos">⚡ Anime de ação com lutas</span>
+            <span class="ai-suggestion-chip" data-prompt="Quem realizou o Inception e qual é o significado do final?">🎬 Curiosidades sobre Inception</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Typing Indicator -->
+    <div class="ai-typing-indicator" id="aiTypingIndicator">
+      <span style="font-size:0.72rem; color:var(--text-muted); margin-right:4px;">GC AI is thinking</span>
+      <div class="ai-typing-dot"></div>
+      <div class="ai-typing-dot"></div>
+      <div class="ai-typing-dot"></div>
+    </div>
+
+    <div class="ai-chat-input-bar">
+      <div class="ai-input-row">
+        <input type="text" class="ai-chat-input" id="aiChatInput" placeholder="Chat or ask for recommendations in any language..." autocomplete="off">
+        <button class="ai-chat-send-btn" id="aiSendBtn" title="Send message">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        </button>
+      </div>
+      <div class="ai-chat-footer-meta">
+        <span id="aiActiveEngineNotice">Engine: Smart Multilingual AI</span>
+        <span id="aiProviderNotice">Active: VidRock</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- JAVASCRIPT: APPLICATION LOGIC & GC AI SMART ENGINE -->
+  <script>
+    let VIDROCK_BASE_URL = "https://vidrock.to";
+
+    // 1. Five Preserved Official Streaming Providers
+    const PROVIDERS = {
+      vidrock: {
+        id: 'vidrock',
+        name: 'VidRock',
+        badge: 'Official',
+        color: '#8B5CF6',
+        buildMovieUrl: (id) => `${VIDROCK_BASE_URL}/movie/${id}`,
+        buildTvUrl: (id, s, e) => `${VIDROCK_BASE_URL}/tv/${id}/${s}/${e}`
+      },
+      vidlink: {
+        id: 'vidlink',
+        name: 'VidLink',
+        badge: 'Fast',
+        color: '#38BDF8',
+        buildMovieUrl: (id) => `https://vidlink.pro/movie/${id}?primaryColor=8b5cf6&secondaryColor=38bdf8`,
+        buildTvUrl: (id, s, e) => `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=8b5cf6&secondaryColor=38bdf8`
+      },
+      vidsrc_cc: {
+        id: 'vidsrc_cc',
+        name: 'VidSrc PRO',
+        badge: 'Subtitles',
+        color: '#10B981',
+        buildMovieUrl: (id) => `https://vidsrc.cc/v2/embed/movie/${id}`,
+        buildTvUrl: (id, s, e) => `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`
+      },
+      vidsrc_to: {
+        id: 'vidsrc_to',
+        name: 'VidSrc (to)',
+        badge: 'Stable',
+        color: '#F59E0B',
+        buildMovieUrl: (id) => `https://vidsrc.to/embed/movie/${id}`,
+        buildTvUrl: (id, s, e) => `https://vidsrc.to/embed/tv/${id}/${s}/${e}`
+      },
+      vidsrc_xyz: {
+        id: 'vidsrc_xyz',
+        name: 'VidSrc (xyz)',
+        badge: 'Backup',
+        color: '#EC4899',
+        buildMovieUrl: (id) => `https://vidsrc.xyz/embed/movie/${id}`,
+        buildTvUrl: (id, s, e) => `https://vidsrc.xyz/embed/tv/${id}/${s}/${e}`
+      }
+    };
+
+    const TMDB_PUBLIC_KEYS = [
+      '1a43f1f22e3cf15ce2cfd8ca5af13e6f',
+      '8265bd1679663a7ea12ac168da84d2e8',
+      'e226f4a5f5bace766952aa0d17182959',
+      'b0f209e86c075f80721eb6b2971ea944'
+    ];
+    let keyIdx = 0;
+    function getApiKey() { return TMDB_PUBLIC_KEYS[keyIdx % TMDB_PUBLIC_KEYS.length]; }
+
+    const TMDB_GENRES = {
+      28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy", 80: "Crime",
+      99: "Documentary", 18: "Drama", 10751: "Family", 14: "Fantasy", 36: "History",
+      27: "Horror", 10402: "Music", 9648: "Mystery", 10749: "Romance", 878: "Sci-Fi",
+      10770: "TV Movie", 53: "Thriller", 10752: "War", 37: "Western",
+      10759: "Action & Adventure", 10765: "Sci-Fi & Fantasy"
+    };
+
+    const AppState = {
+      activeView: 'home',
+      previousView: 'home',
+      catalog: [],
+      heroItem: null,
+      currentPlayingItem: null,
+      currentSeason: 1,
+      currentEpisode: 1,
+      currentServer: localStorage.getItem('gc_preferred_server') || 'vidrock',
+      seriesDetailsCache: {},
+      // GC AI Engine State
+      aiEngine: localStorage.getItem('gc_ai_engine') || 'ollama', // 'ollama' | 'gemini' | 'openai' | 'fallback'
+      aiOllamaUrl: localStorage.getItem('gc_ai_ollama_url') || 'http://localhost:11434',
+      aiModelName: localStorage.getItem('gc_ai_model') || 'llama3.2',
+      aiApiKey: localStorage.getItem('gc_ai_api_key') || '',
+      aiMessages: [],
+      aiSeenIds: new Set()
+    };
+
+    const Storage = {
+      KEYS: {
+        FAVORITES: 'gc_favorites',
+        HISTORY: 'gc_history',
+        CONTINUE: 'gc_continue_watching',
+        AVATAR: 'gc_profile_avatar',
+        SERVER: 'gc_preferred_server',
+        AI_ENGINE: 'gc_ai_engine',
+        AI_URL: 'gc_ai_ollama_url',
+        AI_MODEL: 'gc_ai_model',
+        AI_KEY: 'gc_ai_api_key'
+      },
+      get(k, def = null) {
+        try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; }
+      },
+      set(k, v) {
+        try { localStorage.setItem(k, JSON.stringify(v)); } catch {}
+      },
+      getFavorites() { return this.get(this.KEYS.FAVORITES, []); },
+      isFavorite(id) { return this.getFavorites().some(i => String(i.id) === String(id)); },
+      toggleFavorite(item) {
+        let favs = this.getFavorites();
+        const idx = favs.findIndex(i => String(i.id) === String(item.id));
+        if (idx > -1) {
+          favs.splice(idx, 1);
+          this.set(this.KEYS.FAVORITES, favs);
+          return false;
+        } else {
+          favs.unshift(item);
+          this.set(this.KEYS.FAVORITES, favs);
+          return true;
+        }
+      },
+      getHistory() { return this.get(this.KEYS.HISTORY, []); },
+      addToHistory(item, s = 1, e = 1) {
+        let hist = this.getHistory().filter(h => String(h.id) !== String(item.id));
+        hist.unshift({
+          ...item,
+          season: s,
+          episode: e,
+          watchedAt: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' })
+        });
+        if (hist.length > 50) hist.pop();
+        this.set(this.KEYS.HISTORY, hist);
+      },
+      getContinueWatching() { return this.get(this.KEYS.CONTINUE, []); },
+      updateContinueWatching(item, s = 1, e = 1) {
+        let list = this.getContinueWatching().filter(c => String(c.id) !== String(item.id));
+        list.unshift({
+          ...item,
+          season: Number(s),
+          episode: Number(e),
+          updatedAt: Date.now(),
+          progress: Math.floor(Math.random() * 35) + 40
+        });
+        if (list.length > 25) list.pop();
+        this.set(this.KEYS.CONTINUE, list);
+      },
+      removeContinueWatching(id) {
+        let list = this.getContinueWatching().filter(c => String(c.id) !== String(id));
+        this.set(this.KEYS.CONTINUE, list);
+      },
+      getAvatar() { return localStorage.getItem(this.KEYS.AVATAR); },
+      setAvatar(b64) { localStorage.setItem(this.KEYS.AVATAR, b64); },
+      removeAvatar() { localStorage.removeItem(this.KEYS.AVATAR); }
+    };
+
+    // --------------------------------------------------------------------------
+    // MEDIA SERVICE: ROBUST CLASSIFICATION & TMDB
+    // --------------------------------------------------------------------------
+    const MediaService = {
+      detectFormat(item, forcedFormat = null) {
+        if (forcedFormat === 'movie' || forcedFormat === 'tv') return forcedFormat;
+        if (item.media_type === 'movie') return 'movie';
+        if (item.media_type === 'tv') return 'tv';
+
+        if (item.first_air_date !== undefined || item.number_of_seasons !== undefined || item.number_of_episodes !== undefined) {
+          return 'tv';
+        }
+        if (item.release_date !== undefined || item.runtime !== undefined) {
+          return 'movie';
+        }
+        if (item.name && !item.title) return 'tv';
+        if (item.title && !item.name) return 'movie';
+
+        return 'movie';
+      },
+
+      detectAnime(item) {
+        const isJapanese = item.original_language === 'ja' || (item.origin_country && item.origin_country.includes('JP'));
+        const hasAnimGenre = (Array.isArray(item.genre_ids) && item.genre_ids.includes(16)) ||
+          (Array.isArray(item.genres) && item.genres.some(g => (typeof g === 'object' ? g.id === 16 : /anim/i.test(g))));
+        return Boolean(isJapanese && hasAnimGenre);
+      },
+
+      normalize(item, forcedFormat = null) {
+        if (!item || !item.id) return null;
+
+        const format = this.detectFormat(item, forcedFormat);
+        const isAnime = this.detectAnime(item);
+        const title = item.title || item.name || item.original_title || item.original_name || 'Untitled';
+
+        let year = '';
+        if (item.release_date) year = item.release_date.substring(0, 4);
+        else if (item.first_air_date) year = item.first_air_date.substring(0, 4);
+        else if (item.year) year = String(item.year);
+
+        const poster = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : (item.poster || '');
+        const backdrop = item.backdrop_path ? `https://image.tmdb.org/t/p/original${item.backdrop_path}` : (item.backdrop || poster);
+
+        let genres = [];
+        if (Array.isArray(item.genre_ids)) {
+          genres = item.genre_ids.map(id => TMDB_GENRES[id]).filter(Boolean);
+        } else if (Array.isArray(item.genres)) {
+          genres = item.genres.map(g => typeof g === 'object' ? g.name : g);
+        }
+        if (genres.length === 0) genres = [format === 'movie' ? 'Cinema' : 'TV Series'];
+
+        let badgeText = 'MOVIE';
+        let badgeClass = 'badge-movie';
+        if (isAnime) {
+          badgeText = format === 'tv' ? 'ANIME (SHOW)' : 'ANIME (MOVIE)';
+          badgeClass = 'badge-anime';
+        } else if (format === 'tv') {
+          badgeText = 'TV SHOW';
+          badgeClass = 'badge-tv';
+        }
+
+        return {
+          id: item.id,
+          title,
+          originalTitle: item.original_title || item.original_name || title,
+          year: year || '2024',
+          format,
+          isAnime,
+          badgeText,
+          badgeClass,
+          rating: item.vote_average ? Number(item.vote_average).toFixed(1) : (item.rating || null),
+          poster,
+          backdrop,
+          genres,
+          overview: item.overview || 'Overview not available for this title.',
+          seasons: item.number_of_seasons || 1
+        };
+      },
+
+      async search(query) {
+        if (!query || query.trim().length === 0) return [];
+        try {
+          const key = getApiKey();
+          const q = encodeURIComponent(query.trim());
+          const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${key}&query=${q}&include_adult=false&language=en-US`);
+          if (!res.ok) { keyIdx++; throw new Error('API rotate'); }
+          const data = await res.json();
+          return (data.results || [])
+            .filter(i => i.media_type === 'movie' || i.media_type === 'tv' || (!i.media_type && (i.title || i.name)))
+            .map(i => this.normalize(i))
+            .filter(Boolean);
+        } catch {
+          const q = query.toLowerCase();
+          return AppState.catalog.filter(i => i.title.toLowerCase().includes(q));
+        }
+      },
+
+      async fetchTvDetails(tvId) {
+        if (AppState.seriesDetailsCache[tvId]) return AppState.seriesDetailsCache[tvId];
+        try {
+          const key = getApiKey();
+          const res = await fetch(`https://api.themoviedb.org/3/tv/${tvId}?api_key=${key}&language=en-US`);
+          if (res.ok) {
+            const data = await res.json();
+            AppState.seriesDetailsCache[tvId] = data;
+            return data;
+          }
+        } catch {}
+        return null;
+      },
+
+      async loadInitialFeeds() {
+        try {
+          const key = getApiKey();
+          const [trendRes, movieRes, tvRes, animeRes] = await Promise.all([
+            fetch(`https://api.themoviedb.org/3/trending/all/day?api_key=${key}&language=en-US`),
+            fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${key}&language=en-US`),
+            fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${key}&language=en-US`),
+            fetch(`https://api.themoviedb.org/3/discover/tv?api_key=${key}&with_genres=16&with_original_language=ja&sort_by=popularity.desc&language=en-US`)
+          ]);
+
+          const [trendData, movieData, tvData, animeData] = await Promise.all([
+            trendRes.json(), movieRes.json(), tvRes.json(), animeRes.json()
+          ]);
+
+          let full = [
+            ...(trendData.results || []).map(i => this.normalize(i)),
+            ...(movieData.results || []).map(i => this.normalize(i, 'movie')),
+            ...(tvData.results || []).map(i => this.normalize(i, 'tv')),
+            ...(animeData.results || []).map(i => this.normalize(i, 'tv'))
+          ].filter(Boolean);
+
+          const seen = new Set();
+          return full.filter(item => {
+            const key = `${item.format}_${item.id}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+        } catch {
+          return [];
+        }
+      }
+    };
+
+    // --------------------------------------------------------------------------
+    // ADVANCED GC AI — MULTILINGUAL, CONVERSATIONAL CINEPHILE ASSISTANT
+    // --------------------------------------------------------------------------
+    const GCAIEngine = {
+      // System instructions ensuring full language mirroring & natural conversation
+      getSystemPrompt() {
+        return `You are "GC AI", the sharp, witty, warm, and deeply knowledgeable personal movie assistant on GUI AND CHILL (a personal streaming platform).
+
+CRITICAL RULES:
+1. LANGUAGE MATCHING: You MUST detect the language of the user's message and ALWAYS reply in that EXACT same language (Portuguese, English, Spanish, French, German, Italian, etc.). If the user talks to you in Portuguese, you MUST respond in fluent, natural Portuguese!
+2. NATURAL CONVERSATION: You are an authentic companion. If the user is just saying hello ("Olá", "Tudo bem?", "Hey"), asking who you are, or asking general cinema questions ("Quem realizou Inception?", "Qual o teu filme favorito?"), talk back like a friend! Do NOT force movie search cards unless they actually asked for recommendations or something to watch.
+3. STRUCTURED OUTPUT: You must ALWAYS respond in valid JSON with this exact schema:
+{
+  "isRecommendation": boolean,
+  "reply": "Your natural, charismatic reply in the user's exact language. Be conversational, enthusiastic, and knowledgeable.",
+  "searchQuery": "keywords to query TMDB if recommendation needed, or null",
+  "suggestedTitles": ["Movie or Show Title 1", "Movie or Show Title 2"],
+  "mediaType": "movie" | "tv" | "anime" | "any",
+  "genres": ["Horror", "Action"],
+  "prefersSubtitles": boolean
+}`;
+      },
+
+      // Language detection for the native fallback engine
+      detectLanguage(text) {
+        const lower = text.toLowerCase();
+        if (/\b(olá|ola|oi|tudo bem|como estás|quem és|filme|série|recomenda|terror|comédia|obrigado|quais|quero|bom dia|boa noite|anime|ação)\b/.test(lower)) return 'pt';
+        if (/\b(hola|cómo estás|qué tal|película|recomiéndame|gracias|quiero|terror|acción)\b/.test(lower)) return 'es';
+        if (/\b(bonjour|salut|comment ça va|film|série|conseille|merci|horreur)\b/.test(lower)) return 'fr';
+        return 'en';
+      },
+
+      // Native fallback when no LLM API is available
+      heuristicFallback(userMessage) {
+        const lower = userMessage.toLowerCase();
+        const lang = this.detectLanguage(userMessage);
+
+        const isGreeting = /^(olá|ola|oi|hello|hi|hey|buenas|bonjour|tudo bem|como estás|how are you)/i.test(lower.trim());
+        const isIdentity = /(quem és|who are you|o que fazes|what do you do|quem e você)/i.test(lower);
+        const isCinemaTrivia = /(quem realizou|who directed|director of|significado|meaning of|ending of)/i.test(lower);
+
+        // Purely conversational responses
+        if (isGreeting) {
+          const replies = {
+            pt: "Olá! Tudo ótimo por aqui. Sou o GC AI, o teu assistente pessoal de cinema. Estás com vontade de ver alguma coisa em especial hoje ou queres falar sobre cinema?",
+            es: "¡Hola! Todo genial por aquí. Soy GC AI, tu asistente personal de cine. ¿Te apetece ver algo especial hoy o charlar sobre películas?",
+            fr: "Salut ! Tout va super bien. Je suis GC AI, ton assistant cinéma personnel. Tu cherchas quelque chose à regarder aujourd'hui ?",
+            en: "Hey there! Everything's great here. I'm GC AI, your personal cinema companion. In the mood for something specific to watch today, or want to chat about movies?"
+          };
+          return {
+            isRecommendation: false,
+            reply: replies[lang] || replies.en,
+            suggestedTitles: []
+          };
+        }
+
+        if (isIdentity) {
+          const replies = {
+            pt: "Eu sou o GC AI! Fui criado especialmente para o GUI AND CHILL para te ajudar a descobrir filmes, séries e animes incríveis, explicar teorias e bater um bom papo sobre cinema em qualquer língua.",
+            es: "¡Soy GC AI! Estoy aquí en GUI AND CHILL para ayudarte a encontrar las mejores películas, series y anime, además de charlar sobre cine en cualquier idioma.",
+            fr: "Je suis GC AI ! Conçu pour GUI AND CHILL pour t'aider à dénicher de superbes films, séries et animés, et discuter de cinéma dans n'importe quelle langue.",
+            en: "I'm GC AI! Designed exclusively for GUI AND CHILL to help you discover outstanding movies, shows, and anime across all 5 streaming servers, or just chat about cinema in any language."
+          };
+          return {
+            isRecommendation: false,
+            reply: replies[lang] || replies.en,
+            suggestedTitles: []
+          };
+        }
+
+        if (isCinemaTrivia) {
+          const replies = {
+            pt: "Adoro falar sobre esse tipo de detalhes! Inception, por exemplo, foi realizado pelo brilhante Christopher Nolan em 2010. Aquele peão a girar no final deixa em aberto se o Cobb ainda está a sonhar ou na realidade!",
+            en: "Cinema trivia is my jam! For instance, Inception was directed by Christopher Nolan in 2010. That spinning totem at the end was intentionally left ambiguous to show Cobb no longer cared if it was a dream or reality."
+          };
+          return {
+            isRecommendation: false,
+            reply: replies[lang] || replies.en,
+            suggestedTitles: []
+          };
+        }
+
+        // Recommendation request
+        let mediaType = 'any';
+        if (/anime/i.test(lower)) mediaType = 'anime';
+        else if (/\b(series|série|tv show|show|temporadas)\b/i.test(lower)) mediaType = 'tv';
+        else if (/\b(filme|movie|film|cinema)\b/i.test(lower)) mediaType = 'movie';
+
+        const genres = [];
+        if (/horror|terror|scary|assustador|medo|gore|creepy/i.test(lower)) genres.push('Horror');
+        if (/thriller|suspense|psicológico|psychological|mistério|mystery/i.test(lower)) { genres.push('Thriller'); genres.push('Mystery'); }
+        if (/sci-fi|ficção|space|tempo|time travel|alien|cyberpunk/i.test(lower)) genres.push('Sci-Fi');
+        if (/comedy|comédia|funny|engraçado|rir|humor/i.test(lower)) genres.push('Comedy');
+        if (/action|ação|fight|lutas|tiros|chase/i.test(lower)) genres.push('Action');
+        if (/crime|prison|heist|assalto|fuga|mafia|policial/i.test(lower)) genres.push('Crime');
+
+        const prefersSubtitles = /subtitles|legendas|legendado/i.test(lower);
+
+        let query = userMessage.replace(/recomenda(-me)?|recommend( me)?|quero ver|quero um filme|série como|movie like|show like/gi, '').trim();
+
+        const replies = {
+          pt: "Com certeza! Analisei o catálogo e encontrei opções perfeitas que combinam exatamente com o que pediste:",
+          es: "¡Por supuesto! He analizado el catálogo y encontré opciones ideales para lo que buscas:",
+          fr: "Absolument ! J'ai fouillé dans le catalogue et voici mes meilleures recommandations pour toi :",
+          en: "You got it! I went through the catalog and picked out titles that match your exact vibe:"
+        };
+
+        return {
+          isRecommendation: true,
+          reply: replies[lang] || replies.en,
+          searchQuery: query.length > 2 ? query : null,
+          mediaType,
+          genres,
+          prefersSubtitles
+        };
+      },
+
+      // Call Ollama local server
+      async callOllama(userMessage, history) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 4500);
+
+        const messages = [
+          { role: 'system', content: this.getSystemPrompt() },
+          ...history.slice(-4),
+          { role: 'user', content: userMessage }
+        ];
+
+        const res = await fetch(`${AppState.aiOllamaUrl}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: AppState.aiModelName,
+            messages,
+            stream: false,
+            format: 'json'
+          }),
+          signal: controller.signal
+        });
+        clearTimeout(timeout);
+
+        if (!res.ok) throw new Error(`Ollama HTTP ${res.status}`);
+        const data = await res.json();
+        return JSON.parse(data.message.content);
+      },
+
+      // Call Google Gemini API (Cloud)
+      async callGemini(userMessage, history) {
+        const apiKey = AppState.aiApiKey;
+        if (!apiKey) throw new Error('Missing Gemini API Key');
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 6000);
+
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+        let promptText = this.getSystemPrompt() + "\n\nRecent Conversation:\n";
+        history.slice(-4).forEach(h => {
+          promptText += `${h.role === 'user' ? 'User' : 'Assistant'}: ${h.content}\n`;
+        });
+        promptText += `\nUser: ${userMessage}`;
+
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: promptText }] }],
+            generationConfig: { responseMimeType: "application/json" }
+          }),
+          signal: controller.signal
+        });
+        clearTimeout(timeout);
+
+        if (!res.ok) throw new Error(`Gemini HTTP ${res.status}`);
+        const data = await res.json();
+        const rawJson = data.candidates[0].content.parts[0].text;
+        return JSON.parse(rawJson);
+      },
+
+      // Call OpenAI API
+      async callOpenAI(userMessage, history) {
+        const apiKey = AppState.aiApiKey;
+        if (!apiKey) throw new Error('Missing OpenAI API Key');
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 6000);
+
+        const messages = [
+          { role: 'system', content: this.getSystemPrompt() },
+          ...history.slice(-4),
+          { role: 'user', content: userMessage }
+        ];
+
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages,
+            response_format: { type: "json_object" }
+          }),
+          signal: controller.signal
+        });
+        clearTimeout(timeout);
+
+        if (!res.ok) throw new Error(`OpenAI HTTP ${res.status}`);
+        const data = await res.json();
+        return JSON.parse(data.choices[0].message.content);
+      },
+
+      // Unified Dispatcher
+      async processUserQuery(userMessage) {
+        let result = null;
+        let engineUsed = AppState.aiEngine;
+
+        try {
+          if (AppState.aiEngine === 'ollama') {
+            result = await this.callOllama(userMessage, AppState.aiMessages);
+          } else if (AppState.aiEngine === 'gemini') {
+            result = await this.callGemini(userMessage, AppState.aiMessages);
+          } else if (AppState.aiEngine === 'openai') {
+            result = await this.callOpenAI(userMessage, AppState.aiMessages);
+          }
+        } catch (err) {
+          console.warn(`Engine ${AppState.aiEngine} failed. Triggering Smart Semantic Fallback:`, err.message);
+          engineUsed = 'fallback';
+        }
+
+        if (!result) {
+          result = this.heuristicFallback(userMessage);
+          engineUsed = 'fallback';
+        }
+
+        // If the query is conversational (no recommendations needed), return direct text!
+        if (!result.isRecommendation) {
+          return {
+            text: result.reply || "I'm here to chat or find you something awesome to watch!",
+            items: [],
+            engine: engineUsed
+          };
+        }
+
+        // Otherwise, fetch and score items to match the user's criteria
+        let pool = [...AppState.catalog];
+        if (AppState.heroItem && !pool.some(i => i.id === AppState.heroItem.id)) {
+          pool.push(AppState.heroItem);
+        }
+
+        // Search TMDB for specific title recommendations or keywords if needed
+        const searchTerms = [];
+        if (Array.isArray(result.suggestedTitles)) {
+          searchTerms.push(...result.suggestedTitles);
+        }
+        if (result.searchQuery) {
+          searchTerms.push(result.searchQuery);
+        }
+
+        for (const term of searchTerms.slice(0, 3)) {
+          try {
+            const extResults = await MediaService.search(term);
+            extResults.forEach(item => {
+              if (!pool.some(p => p.id === item.id)) pool.push(item);
+            });
+          } catch {}
+        }
+
+        // Score catalog
+        const scored = pool
+          .filter(item => !AppState.aiSeenIds.has(item.id))
+          .map(item => {
+            let score = 0;
+            // Format match
+            if (result.mediaType === 'anime' && item.isAnime) score += 30;
+            else if (result.mediaType === 'tv' && item.format === 'tv') score += 20;
+            else if (result.mediaType === 'movie' && item.format === 'movie') score += 20;
+
+            // Genres
+            if (result.genres && Array.isArray(result.genres)) {
+              const itemG = (item.genres || []).map(g => g.toLowerCase());
+              result.genres.forEach(rg => {
+                if (itemG.some(ig => ig.includes(rg.toLowerCase()))) score += 15;
+              });
+            }
+
+            // Keyword hits in overview
+            const over = (item.overview || '').toLowerCase();
+            const tit = (item.title || '').toLowerCase();
+            (userMessage.toLowerCase().split(/\s+/)).forEach(word => {
+              if (word.length > 3 && (over.includes(word) || tit.includes(word))) score += 8;
+            });
+
+            // Specific title match
+            if (result.suggestedTitles && result.suggestedTitles.some(st => tit.includes(st.toLowerCase()))) {
+              score += 45;
+            }
+
+            return { item, score };
+          })
+          .filter(e => e.score > 0)
+          .sort((a, b) => b.score - a.score);
+
+        const recommendations = scored.slice(0, 4).map(e => ({
+          ...e.item,
+          aiReason: e.item.overview.length > 130 ? e.item.overview.substring(0, 130) + '...' : e.item.overview
+        }));
+
+        let subtitlesNotice = '';
+        if (result.prefersSubtitles) {
+          subtitlesNotice = '\n\n💡 *Tip: For subtitles, you can switch to the **VidSrc PRO** server in the player!*';
+        }
+
+        return {
+          text: (result.reply || "Here are my top cinema recommendations for you:") + subtitlesNotice,
+          items: recommendations,
+          engine: engineUsed
+        };
+      }
+    };
+
+    // --------------------------------------------------------------------------
+    // UI CONTROLLER (INCLUDING MULTILINGUAL CHAT & SETTINGS)
+    // --------------------------------------------------------------------------
+    const UI = {
+      init() {
+        this.renderBrandAvatar();
+        this.buildServerSwitchPills();
+        this.bindEvents();
+        this.initGCAI();
+      },
+
+      renderBrandAvatar() {
+        const photo = Storage.getAvatar();
+        const wrap = document.getElementById('brandLogoWrapper');
+        const prev = document.getElementById('settingsAvatarPreview');
+        if (photo) {
+          wrap.innerHTML = `<img src="${photo}" class="brand-avatar-img" alt="Logo">`;
+          if (prev) prev.innerHTML = `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;">`;
+        } else {
+          wrap.innerHTML = `<span class="brand-monogram">GC</span>`;
+          if (prev) prev.innerHTML = `<span class="brand-monogram">GC</span>`;
+        }
+      },
+
+      buildServerSwitchPills() {
+        const container = document.getElementById('serverPillsContainer');
+        container.innerHTML = '';
+
+        Object.values(PROVIDERS).forEach(prov => {
+          const btn = document.createElement('button');
+          btn.className = `server-pill-btn ${AppState.currentServer === prov.id ? 'active' : ''}`;
+          btn.dataset.serverId = prov.id;
+          btn.innerHTML = `
+            <span class="server-dot-indicator" style="color:${prov.color}"></span>
+            <span>${prov.name}</span>
+            <span style="font-size:0.7rem; opacity:0.75; font-weight:500;">(${prov.badge})</span>
+          `;
+
+          btn.addEventListener('click', () => {
+            AppState.currentServer = prov.id;
+            localStorage.setItem('gc_preferred_server', prov.id);
+            document.querySelectorAll('.server-pill-btn').forEach(b => b.classList.toggle('active', b.dataset.serverId === prov.id));
+            
+            const activeNotice = document.getElementById('aiActiveServerTag');
+            if (activeNotice) activeNotice.textContent = prov.name;
+            const provNotice = document.getElementById('aiProviderNotice');
+            if (provNotice) provNotice.textContent = `Active: ${prov.name}`;
+
+            if (AppState.currentPlayingItem) {
+              App.updatePlayerStreamUrl(AppState.currentPlayingItem, AppState.currentSeason, AppState.currentEpisode);
+              UI.showToast(`Switched server to ${prov.name}`);
+            }
+          });
+
+          container.appendChild(btn);
+        });
+      },
+
+      renderHero(item) {
+        if (!item) return;
+        AppState.heroItem = item;
+
+        document.getElementById('heroBackdrop').src = item.backdrop || item.poster;
+        document.getElementById('heroTitle').textContent = item.title;
+        document.getElementById('heroYear').textContent = item.year;
+        document.getElementById('heroGenres').textContent = item.genres.slice(0, 3).join(', ');
+        document.getElementById('heroOverview').textContent = item.overview;
+        document.getElementById('heroTypeBadge').textContent = item.badgeText;
+
+        const ratingEl = document.getElementById('heroRatingBadge');
+        if (item.rating) {
+          ratingEl.style.display = 'inline-flex';
+          ratingEl.textContent = `★ ${item.rating}`;
+        } else {
+          ratingEl.style.display = 'none';
+        }
+
+        const favBtn = document.getElementById('heroFavBtn');
+        const isFav = Storage.isFavorite(item.id);
+        favBtn.classList.toggle('active', isFav);
+        favBtn.innerHTML = isFav 
+          ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`
+          : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`;
+      },
+
+      createCard(item, isContinueWatching = false) {
+        const card = document.createElement('div');
+        card.className = 'media-card';
+        const isFav = Storage.isFavorite(item.id);
+        const ratingHtml = item.rating ? `<div class="card-badge-rating">★ ${item.rating}</div>` : '';
+
+        let extraBadge = item.badgeText;
+        if (isContinueWatching && item.format === 'tv') {
+          extraBadge = `S${item.season}:E${item.episode}`;
+        }
+
+        card.innerHTML = `
+          <div class="card-badge-type ${item.badgeClass}">${extraBadge}</div>
+          ${!isContinueWatching ? ratingHtml : ''}
+          ${isContinueWatching ? `<button class="continue-dismiss-btn" data-act="dismiss" title="Remove from Continue Watching">✕</button>` : ''}
+          ${item.poster ? `<img src="${item.poster}" alt="${item.title}" class="card-poster" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'poster-fallback\\'><div>${item.title}</div></div>'">` : `<div class="poster-fallback"><div>${item.title}</div></div>`}
+          
+          ${isContinueWatching ? `
+            <div class="continue-progress-wrap">
+              <div class="continue-progress-bar" style="width: ${item.progress || 60}%;"></div>
+            </div>
+          ` : ''}
+
+          <div class="card-hover-overlay">
+            <div class="card-title" title="${item.title}">${item.title}</div>
+            <div class="card-info-row">
+              <span>${isContinueWatching && item.format === 'tv' ? `Season ${item.season} Ep ${item.episode}` : item.year || ''}</span>
+              <span>${item.genres[0] || ''}</span>
+            </div>
+            <div class="card-actions-quick">
+              <button class="quick-play-btn" data-act="play">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                ${isContinueWatching ? 'Resume' : (item.format === 'tv' ? 'Episodes' : 'Play Movie')}
+              </button>
+              <button class="quick-fav-btn ${isFav ? 'active' : ''}" data-act="fav" title="Save to My List">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              </button>
+            </div>
+          </div>
+        `;
+
+        card.addEventListener('click', (e) => {
+          const play = e.target.closest('[data-act="play"]');
+          const fav = e.target.closest('[data-act="fav"]');
+          const dismiss = e.target.closest('[data-act="dismiss"]');
+
+          if (dismiss) {
+            e.stopPropagation();
+            Storage.removeContinueWatching(item.id);
+            UI.renderHomeRows();
+            UI.showToast(`Removed "${item.title}" from Continue Watching`);
+            return;
+          }
+
+          if (play) {
+            e.stopPropagation();
+            App.openPlayer(item, item.season || 1, item.episode || 1);
+          } else if (fav) {
+            e.stopPropagation();
+            const added = Storage.toggleFavorite(item);
+            fav.classList.toggle('active', added);
+            fav.querySelector('svg').setAttribute('fill', added ? 'currentColor' : 'none');
+            UI.showToast(added ? `Saved "${item.title}" to My List!` : `Removed from My List.`);
+            if (AppState.activeView === 'mylist') App.renderMyList();
+          } else {
+            if (isContinueWatching) {
+              App.openPlayer(item, item.season || 1, item.episode || 1);
+            } else {
+              App.openDetails(item);
+            }
+          }
+        });
+
+        return card;
+      },
+
+      renderHomeRows() {
+        const wrap = document.getElementById('catalogRowsContainer');
+        wrap.innerHTML = '';
+
+        const continueList = Storage.getContinueWatching();
+        if (continueList.length > 0) {
+          const continueSection = document.createElement('section');
+          continueSection.innerHTML = `
+            <div class="section-header">
+              <div class="section-title-wrap">
+                <div class="section-title-bar" style="background: linear-gradient(180deg, #38BDF8, #8B5CF6);"></div>
+                <h2 class="section-title">Continue Watching</h2>
+              </div>
+            </div>
+            <div class="carousel-container">
+              <button class="carousel-btn prev">‹</button>
+              <div class="carousel-track"></div>
+              <button class="carousel-btn next">›</button>
+            </div>
+          `;
+          const track = continueSection.querySelector('.carousel-track');
+          continueList.forEach(item => track.appendChild(this.createCard(item, true)));
+
+          continueSection.querySelector('.carousel-btn.prev').onclick = () => track.scrollBy({ left: -track.clientWidth * 0.75, behavior: 'smooth' });
+          continueSection.querySelector('.carousel-btn.next').onclick = () => track.scrollBy({ left: track.clientWidth * 0.75, behavior: 'smooth' });
+          wrap.appendChild(continueSection);
+        }
+
+        const sections = [
+          { title: "Popular Movies", filter: (i) => i.format === 'movie' && !i.isAnime },
+          { title: "Trending TV Shows", filter: (i) => i.format === 'tv' && !i.isAnime },
+          { title: "Anime Universe (Shows & Movies)", filter: (i) => i.isAnime },
+          { title: "Action & Adventure", filter: (i) => i.genres.some(g => /action|adventure/i.test(g)) },
+          { title: "Sci-Fi & Cyberpunk", filter: (i) => i.genres.some(g => /sci-fi|science fiction/i.test(g)) }
+        ];
+
+        sections.forEach(sec => {
+          const items = AppState.catalog.filter(sec.filter);
+          if (items.length === 0) return;
+
+          const row = document.createElement('section');
+          row.innerHTML = `
+            <div class="section-header">
+              <div class="section-title-wrap">
+                <div class="section-title-bar"></div>
+                <h2 class="section-title">${sec.title}</h2>
+              </div>
+            </div>
+            <div class="carousel-container">
+              <button class="carousel-btn prev">‹</button>
+              <div class="carousel-track"></div>
+              <button class="carousel-btn next">›</button>
+            </div>
+          `;
+
+          const track = row.querySelector('.carousel-track');
+          items.forEach(item => track.appendChild(this.createCard(item, false)));
+
+          row.querySelector('.carousel-btn.prev').onclick = () => track.scrollBy({ left: -track.clientWidth * 0.75, behavior: 'smooth' });
+          row.querySelector('.carousel-btn.next').onclick = () => track.scrollBy({ left: track.clientWidth * 0.75, behavior: 'smooth' });
+
+          wrap.appendChild(row);
+        });
+      },
+
+      showToast(msg) {
+        const t = document.createElement('div');
+        t.className = 'toast-msg';
+        t.innerHTML = `<span>${msg}</span>`;
+        document.getElementById('toastContainer').appendChild(t);
+        setTimeout(() => {
+          t.style.opacity = '0';
+          t.style.transition = '0.3s';
+          setTimeout(() => t.remove(), 300);
+        }, 3000);
+      },
+
+      // ------------------------------------------------------------------------
+      // GC AI CHAT COMPONENT
+      // ------------------------------------------------------------------------
+      initGCAI() {
+        const fab = document.getElementById('aiFabBtn');
+        const chatWindow = document.getElementById('aiChatWindow');
+        const closeBtn = document.getElementById('aiCloseChatBtn');
+        const newChatBtn = document.getElementById('aiNewChatBtn');
+        const sendBtn = document.getElementById('aiSendBtn');
+        const input = document.getElementById('aiChatInput');
+
+        const activeProvName = PROVIDERS[AppState.currentServer]?.name || 'VidRock';
+        document.getElementById('aiActiveServerTag').textContent = activeProvName;
+        document.getElementById('aiProviderNotice').textContent = `Active: ${activeProvName}`;
+
+        fab.onclick = () => {
+          chatWindow.classList.toggle('open');
+          if (chatWindow.classList.contains('open')) input.focus();
+        };
+
+        closeBtn.onclick = () => chatWindow.classList.remove('open');
+
+        newChatBtn.onclick = () => {
+          AppState.aiMessages = [];
+          AppState.aiSeenIds.clear();
+          const msgContainer = document.getElementById('aiChatMessages');
+          msgContainer.innerHTML = `
+            <div class="ai-msg assistant">
+              <div class="ai-bubble">
+                Started a new chat! Feel free to talk in <strong>any language</strong> or ask for movie/show recommendations.
+                <div class="ai-suggestions-wrap">
+                  <span class="ai-suggestion-chip" data-prompt="Olá! Que tipo de filmes tens para me recomendar hoje?">🇵🇹 O que tens para me recomendar?</span>
+                  <span class="ai-suggestion-chip" data-prompt="A gripping crime thriller series like Prison Break">🇺🇸 Series like Prison Break</span>
+                  <span class="ai-suggestion-chip" data-prompt="Recomenda-me um anime de ação com combates épicos">⚡ Anime de ação com lutas</span>
+                  <span class="ai-suggestion-chip" data-prompt="Quem realizou o Inception e qual é o significado do final?">🎬 Curiosidades sobre Inception</span>
+                </div>
+              </div>
+            </div>
+          `;
+          this.bindSuggestionChips();
+          UI.showToast('Started new AI conversation');
+        };
+
+        const handleSend = async () => {
+          const text = input.value.trim();
+          if (!text) return;
+          input.value = '';
+          await this.sendUserMessage(text);
+        };
+
+        sendBtn.onclick = handleSend;
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSend();
+          }
+        });
+
+        this.bindSuggestionChips();
+      },
+
+      bindSuggestionChips() {
+        document.querySelectorAll('.ai-suggestion-chip').forEach(chip => {
+          chip.onclick = () => {
+            const prompt = chip.dataset.prompt;
+            this.sendUserMessage(prompt);
+          };
+        });
+      },
+
+      async sendUserMessage(text) {
+        const msgContainer = document.getElementById('aiChatMessages');
+        const typing = document.getElementById('aiTypingIndicator');
+
+        // Render User Bubble
+        const userMsg = document.createElement('div');
+        userMsg.className = 'ai-msg user';
+        userMsg.innerHTML = `<div class="ai-bubble">${this.escapeHtml(text)}</div>`;
+        msgContainer.appendChild(userMsg);
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+
+        AppState.aiMessages.push({ role: 'user', content: text });
+        typing.style.display = 'flex';
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+
+        try {
+          const result = await GCAIEngine.processUserQuery(text);
+          typing.style.display = 'none';
+
+          // Update Status
+          const statusDot = document.getElementById('aiStatusIndicator');
+          const statusText = document.getElementById('aiStatusText');
+          if (result.engine === 'ollama') {
+            statusDot.style.background = '#10B981';
+            statusText.textContent = `Ollama (${AppState.aiModelName})`;
+          } else if (result.engine === 'gemini') {
+            statusDot.style.background = '#38BDF8';
+            statusText.textContent = 'Google Gemini API';
+          } else if (result.engine === 'openai') {
+            statusDot.style.background = '#10B981';
+            statusText.textContent = 'OpenAI GPT-4o';
+          } else {
+            statusDot.style.background = '#8B5CF6';
+            statusText.textContent = 'Native Semantic Engine';
+          }
+
+          // Render Assistant Bubble
+          const assistantMsg = document.createElement('div');
+          assistantMsg.className = 'ai-msg assistant';
+
+          let cardsHtml = '';
+          if (result.items && result.items.length > 0) {
+            cardsHtml = `<div class="ai-cards-container">`;
+            result.items.forEach(item => {
+              const currentProv = PROVIDERS[AppState.currentServer] || PROVIDERS.vidrock;
+              cardsHtml += `
+                <div class="ai-recom-card" data-id="${item.id}">
+                  <img src="${item.poster || ''}" alt="${item.title}" class="ai-recom-poster" onerror="this.src=''; this.style.display='none';">
+                  <div class="ai-recom-body">
+                    <div>
+                      <div class="ai-recom-title" title="${item.title}">${item.title}</div>
+                      <div class="ai-recom-meta">
+                        <span>${item.year}</span>
+                        <span>•</span>
+                        <span style="color:#FBBF24;">★ ${item.rating || 'N/A'}</span>
+                        <span>•</span>
+                        <span style="color:var(--accent-purple);">${item.badgeText}</span>
+                      </div>
+                      <div class="ai-recom-reason">${item.aiReason}</div>
+                    </div>
+                    <div class="ai-recom-actions">
+                      <button class="ai-recom-btn-play" data-act="ai-play" data-id="${item.id}" title="Watch via ${currentProv.name}">
+                        ▶ Watch on ${currentProv.name}
+                      </button>
+                      <button class="ai-recom-btn-icon" data-act="ai-info" data-id="${item.id}" title="Details">
+                        ℹ️ Info
+                      </button>
+                      <button class="ai-recom-btn-icon" data-act="ai-seen" data-id="${item.id}" title="I've already seen this">
+                        ✓ Seen
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              `;
+            });
+            cardsHtml += `</div>`;
+          }
+
+          assistantMsg.innerHTML = `
+            <div class="ai-bubble">
+              ${this.escapeHtml(result.text).replace(/\n/g, '<br>')}
+              ${cardsHtml}
+            </div>
+          `;
+          msgContainer.appendChild(assistantMsg);
+
+          // Card Buttons Listeners
+          assistantMsg.querySelectorAll('[data-act="ai-play"]').forEach(b => {
+            b.onclick = () => {
+              const item = result.items.find(i => String(i.id) === String(b.dataset.id));
+              if (item) App.openPlayer(item, 1, 1);
+            };
+          });
+
+          assistantMsg.querySelectorAll('[data-act="ai-info"]').forEach(b => {
+            b.onclick = () => {
+              const item = result.items.find(i => String(i.id) === String(b.dataset.id));
+              if (item) App.openDetails(item);
+            };
+          });
+
+          assistantMsg.querySelectorAll('[data-act="ai-seen"]').forEach(b => {
+            b.onclick = () => {
+              AppState.aiSeenIds.add(Number(b.dataset.id));
+              b.closest('.ai-recom-card').style.opacity = '0.35';
+              b.textContent = 'Marked';
+              UI.showToast('Updated! GC AI will exclude this in the next recommendations.');
+            };
+          });
+
+          AppState.aiMessages.push({ role: 'assistant', content: result.text });
+        } catch {
+          typing.style.display = 'none';
+          const errMsg = document.createElement('div');
+          errMsg.className = 'ai-msg assistant';
+          errMsg.innerHTML = `
+            <div class="ai-bubble" style="border-color:#EF4444;">
+              Sorry, I encountered an issue analyzing that request. Please try asking again!
+            </div>
+          `;
+          msgContainer.appendChild(errMsg);
+        }
+
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+      },
+
+      escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      },
+
+      bindEvents() {
+        window.addEventListener('scroll', () => {
+          document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+        });
+
+        document.getElementById('brandBtn').onclick = () => App.navigateTo('home');
+
+        document.querySelectorAll('.nav-item').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const v = btn.getAttribute('data-view');
+            App.navigateTo(v);
+            document.getElementById('mobileDrawer').classList.remove('open');
+            document.getElementById('drawerOverlay').classList.remove('active');
+          });
+        });
+
+        // Search Input
+        const searchInput = document.getElementById('searchInput');
+        const clearBtn = document.getElementById('searchClearBtn');
+        const spinner = document.getElementById('searchSpinner');
+
+        let debounceTimer;
+        searchInput.addEventListener('input', (e) => {
+          const val = e.target.value;
+          clearBtn.style.display = val.length > 0 ? 'block' : 'none';
+
+          clearTimeout(debounceTimer);
+          if (val.trim().length === 0) {
+            spinner.style.display = 'none';
+            App.navigateTo(AppState.previousView || 'home');
+            return;
+          }
+
+          spinner.style.display = 'block';
+          debounceTimer = setTimeout(async () => {
+            await App.handleSearch(val.trim());
+            spinner.style.display = 'none';
+          }, 280);
+        });
+
+        clearBtn.onclick = () => {
+          searchInput.value = '';
+          clearBtn.style.display = 'none';
+          spinner.style.display = 'none';
+          App.navigateTo('home');
+        };
+
+        // Hero Buttons
+        document.getElementById('heroPlayBtn').onclick = () => { if (AppState.heroItem) App.openPlayer(AppState.heroItem); };
+        document.getElementById('heroInfoBtn').onclick = () => { if (AppState.heroItem) App.openDetails(AppState.heroItem); };
+        document.getElementById('heroFavBtn').onclick = () => {
+          if (AppState.heroItem) {
+            Storage.toggleFavorite(AppState.heroItem);
+            UI.renderHero(AppState.heroItem);
+          }
+        };
+
+        // Player Buttons
+        document.getElementById('playerBackBtn').onclick = () => App.closePlayer();
+        document.getElementById('playerReloadBtn').onclick = () => {
+          const f = document.getElementById('vidrockIframe');
+          const s = f.src;
+          f.src = '';
+          setTimeout(() => f.src = s, 100);
+        };
+
+        // Modals Close
+        document.getElementById('modalCloseBtn').onclick = () => document.getElementById('detailsModal').classList.remove('active');
+        document.getElementById('settingsBtn').onclick = () => {
+          document.getElementById('defaultServerSelector').value = AppState.currentServer;
+          document.getElementById('aiProviderSelector').value = AppState.aiEngine;
+          document.getElementById('aiOllamaUrlInput').value = AppState.aiOllamaUrl;
+          document.getElementById('aiModelNameInput').value = AppState.aiModelName;
+          document.getElementById('aiApiKeyInput').value = AppState.aiApiKey;
+          this.updateSettingsEngineUI(AppState.aiEngine);
+          document.getElementById('settingsModal').classList.add('active');
+        };
+        document.getElementById('settingsCloseBtn').onclick = () => document.getElementById('settingsModal').classList.remove('active');
+
+        // Settings AI Engine UI switch
+        document.getElementById('aiProviderSelector').onchange = (e) => {
+          this.updateSettingsEngineUI(e.target.value);
+        };
+
+        // Save AI Configuration
+        document.getElementById('aiSaveConfigBtn').onclick = () => {
+          const engine = document.getElementById('aiProviderSelector').value;
+          const url = document.getElementById('aiOllamaUrlInput').value.trim();
+          const model = document.getElementById('aiModelNameInput').value.trim();
+          const key = document.getElementById('aiApiKeyInput').value.trim();
+
+          AppState.aiEngine = engine;
+          AppState.aiOllamaUrl = url;
+          AppState.aiModelName = model;
+          AppState.aiApiKey = key;
+
+          localStorage.setItem('gc_ai_engine', engine);
+          localStorage.setItem('gc_ai_ollama_url', url);
+          localStorage.setItem('gc_ai_model', model);
+          localStorage.setItem('gc_ai_api_key', key);
+
+          UI.showToast('GC AI engine configuration saved!');
+        };
+
+        // Test AI Connection
+        document.getElementById('aiTestConnectionBtn').onclick = async () => {
+          const engine = document.getElementById('aiProviderSelector').value;
+          UI.showToast(`Testing ${engine.toUpperCase()} connection...`);
+
+          if (engine === 'ollama') {
+            const url = document.getElementById('aiOllamaUrlInput').value.trim();
+            try {
+              const res = await fetch(`${url}/api/tags`, { method: 'GET' });
+              if (res.ok) {
+                const data = await res.json();
+                UI.showToast(`Ollama Connected! Found ${data.models?.length || 0} model(s).`);
+              } else {
+                UI.showToast(`Ollama returned status ${res.status}`);
+              }
+            } catch {
+              UI.showToast(`Could not reach Ollama at ${url}. Semantic fallback will be used.`);
+            }
+          } else if (engine === 'gemini') {
+            const key = document.getElementById('aiApiKeyInput').value.trim();
+            if (!key) { UI.showToast('Please enter your Gemini API Key first.'); return; }
+            try {
+              const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: "Hello" }] }] })
+              });
+              if (res.ok) UI.showToast('Gemini API Connected successfully!');
+              else UI.showToast('Gemini API Key rejected or invalid.');
+            } catch {
+              UI.showToast('Network error connecting to Gemini API.');
+            }
+          } else {
+            UI.showToast('Built-in engine is active and ready.');
+          }
+        };
+
+        // Save Default Server
+        document.getElementById('defaultServerSelector').onchange = (e) => {
+          AppState.currentServer = e.target.value;
+          localStorage.setItem('gc_preferred_server', e.target.value);
+          UI.buildServerSwitchPills();
+          const provName = PROVIDERS[e.target.value].name;
+          document.getElementById('aiActiveServerTag').textContent = provName;
+          document.getElementById('aiProviderNotice').textContent = `Active: ${provName}`;
+          UI.showToast(`Default server set to ${provName}`);
+        };
+
+        // Avatar Upload
+        document.getElementById('avatarFileInput').onchange = (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const r = new FileReader();
+            r.onload = (ev) => {
+              Storage.setAvatar(ev.target.result);
+              UI.renderBrandAvatar();
+              UI.showToast('Profile photo updated successfully!');
+            };
+            r.readAsDataURL(file);
+          }
+        };
+
+        document.getElementById('removeAvatarBtn').onclick = () => {
+          Storage.removeAvatar();
+          UI.renderBrandAvatar();
+          UI.showToast('Restored "GC" monogram!');
+        };
+
+        document.getElementById('clearAiChatBtn').onclick = () => {
+          AppState.aiMessages = [];
+          AppState.aiSeenIds.clear();
+          UI.showToast('AI chat history cleared!');
+        };
+
+        document.getElementById('clearContinueBtn').onclick = () => {
+          Storage.set(Storage.KEYS.CONTINUE, []);
+          UI.showToast('Continue Watching cleared!');
+          UI.renderHomeRows();
+        };
+
+        document.getElementById('clearHistoryBtn').onclick = () => {
+          Storage.set(Storage.KEYS.HISTORY, []);
+          UI.showToast('Watch history cleared!');
+          if (AppState.activeView === 'history') App.renderHistory();
+        };
+
+        document.getElementById('clearFavoritesBtn').onclick = () => {
+          Storage.set(Storage.KEYS.FAVORITES, []);
+          UI.showToast('My List cleared!');
+          if (AppState.activeView === 'mylist') App.renderMyList();
+        };
+
+        document.getElementById('clearCacheBtn').onclick = () => {
+          localStorage.clear();
+          location.reload();
+        };
+
+        // Mobile Drawer
+        document.getElementById('hamburgerBtn').onclick = () => {
+          document.getElementById('mobileDrawer').classList.add('open');
+          document.getElementById('drawerOverlay').classList.add('active');
+        };
+        document.getElementById('closeDrawerBtn').onclick = () => {
+          document.getElementById('mobileDrawer').classList.remove('open');
+          document.getElementById('drawerOverlay').classList.remove('active');
+        };
+        document.getElementById('drawerOverlay').onclick = () => {
+          document.getElementById('mobileDrawer').classList.remove('open');
+          document.getElementById('drawerOverlay').classList.remove('active');
+        };
+      },
+
+      updateSettingsEngineUI(engine) {
+        const ollamaBlock = document.getElementById('aiOllamaSettingsBlock');
+        const cloudBlock = document.getElementById('aiCloudKeyBlock');
+
+        if (engine === 'ollama') {
+          ollamaBlock.style.display = 'block';
+          cloudBlock.style.display = 'none';
+        } else if (engine === 'gemini' || engine === 'openai') {
+          ollamaBlock.style.display = 'none';
+          cloudBlock.style.display = 'block';
+        } else {
+          ollamaBlock.style.display = 'none';
+          cloudBlock.style.display = 'none';
+        }
+      }
+    };
+
+    // --------------------------------------------------------------------------
+    // APPLICATION CONTROLLER
+    // --------------------------------------------------------------------------
+    const App = {
+      async init() {
+        UI.init();
+
+        const feeds = await MediaService.loadInitialFeeds();
+        AppState.catalog = feeds;
+
+        if (AppState.catalog.length > 0) {
+          UI.renderHero(AppState.catalog[0]);
+          UI.renderHomeRows();
+        }
+
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('active'));
+            if (document.getElementById('playerView').classList.contains('active')) App.closePlayer();
+            const aiChat = document.getElementById('aiChatWindow');
+            if (aiChat.classList.contains('open')) aiChat.classList.remove('open');
+          }
+        });
+      },
+
+      navigateTo(view) {
+        if (AppState.activeView !== 'search') AppState.previousView = AppState.activeView;
+        AppState.activeView = view;
+
+        document.querySelectorAll('.nav-item').forEach(el => {
+          el.classList.toggle('active', el.getAttribute('data-view') === view);
+        });
+
+        const home = document.getElementById('homeView');
+        const grid = document.getElementById('gridView');
+
+        if (view === 'home') {
+          home.style.display = 'block';
+          grid.style.display = 'none';
+          UI.renderHomeRows();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          home.style.display = 'none';
+          grid.style.display = 'flex';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+
+          if (view === 'movies') this.renderGrid('Movies', (i) => i.format === 'movie');
+          else if (view === 'series') this.renderGrid('TV Shows', (i) => i.format === 'tv');
+          else if (view === 'anime') this.renderAnimeView();
+          else if (view === 'mylist') this.renderMyList();
+          else if (view === 'history') this.renderHistory();
+        }
+      },
+
+      async handleSearch(query) {
+        AppState.activeView = 'search';
+        document.getElementById('homeView').style.display = 'none';
+        document.getElementById('gridView').style.display = 'flex';
+        document.getElementById('gridTitle').textContent = `Search: "${query}"`;
+        document.getElementById('gridFilters').innerHTML = '';
+
+        const grid = document.getElementById('gridContent');
+        const empty = document.getElementById('gridEmptyState');
+        grid.innerHTML = '';
+
+        const results = await MediaService.search(query);
+
+        if (results.length === 0) {
+          empty.style.display = 'flex';
+        } else {
+          empty.style.display = 'none';
+          results.forEach(item => grid.appendChild(UI.createCard(item, false)));
+        }
+      },
+
+      renderGrid(title, filterFn) {
+        document.getElementById('gridTitle').textContent = title;
+        document.getElementById('gridFilters').innerHTML = '';
+        const grid = document.getElementById('gridContent');
+        const empty = document.getElementById('gridEmptyState');
+        grid.innerHTML = '';
+
+        const items = AppState.catalog.filter(filterFn);
+        if (items.length === 0) empty.style.display = 'flex';
+        else {
+          empty.style.display = 'none';
+          items.forEach(i => grid.appendChild(UI.createCard(i, false)));
+        }
+      },
+
+      renderAnimeView() {
+        document.getElementById('gridTitle').textContent = 'Anime Universe';
+        const filterWrap = document.getElementById('gridFilters');
+        filterWrap.innerHTML = `
+          <button class="filter-tab-btn active" data-sub="all">All Anime</button>
+          <button class="filter-tab-btn" data-sub="series">Anime Shows</button>
+          <button class="filter-tab-btn" data-sub="movies">Anime Movies</button>
+        `;
+
+        const renderFiltered = (mode = 'all') => {
+          const grid = document.getElementById('gridContent');
+          const empty = document.getElementById('gridEmptyState');
+          grid.innerHTML = '';
+
+          const animes = AppState.catalog.filter(item => {
+            if (!item.isAnime) return false;
+            if (mode === 'series') return item.format === 'tv';
+            if (mode === 'movies') return item.format === 'movie';
+            return true;
+          });
+
+          if (animes.length === 0) empty.style.display = 'flex';
+          else {
+            empty.style.display = 'none';
+            animes.forEach(i => grid.appendChild(UI.createCard(i, false)));
+          }
+        };
+
+        renderFiltered('all');
+
+        filterWrap.querySelectorAll('.filter-tab-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            filterWrap.querySelectorAll('.filter-tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderFiltered(btn.dataset.sub);
+          });
+        });
+      },
+
+      renderMyList() {
+        document.getElementById('gridTitle').textContent = 'My List';
+        document.getElementById('gridFilters').innerHTML = '';
+        const grid = document.getElementById('gridContent');
+        const empty = document.getElementById('gridEmptyState');
+        grid.innerHTML = '';
+
+        const favs = Storage.getFavorites();
+        if (favs.length === 0) {
+          empty.style.display = 'flex';
+          document.getElementById('emptyTitle').textContent = 'Your list is empty.';
+        } else {
+          empty.style.display = 'none';
+          favs.forEach(i => grid.appendChild(UI.createCard(i, false)));
+        }
+      },
+
+      renderHistory() {
+        document.getElementById('gridTitle').textContent = 'Watch History';
+        document.getElementById('gridFilters').innerHTML = '';
+        const grid = document.getElementById('gridContent');
+        const empty = document.getElementById('gridEmptyState');
+        grid.innerHTML = '';
+
+        const hist = Storage.getHistory();
+        if (hist.length === 0) {
+          empty.style.display = 'flex';
+          document.getElementById('emptyTitle').textContent = 'No watch history yet.';
+        } else {
+          empty.style.display = 'none';
+          hist.forEach(i => grid.appendChild(UI.createCard(i, false)));
+        }
+      },
+
+      openDetails(item) {
+        document.getElementById('modalBackdrop').src = item.backdrop || item.poster;
+        document.getElementById('modalPoster').src = item.poster;
+        document.getElementById('modalTitle').textContent = item.title;
+        document.getElementById('modalYear').textContent = item.year;
+        document.getElementById('modalType').textContent = item.badgeText;
+        document.getElementById('modalOverview').textContent = item.overview;
+
+        const ratingEl = document.getElementById('modalRating');
+        if (item.rating) {
+          ratingEl.style.display = 'inline-flex';
+          ratingEl.textContent = `★ ${item.rating}`;
+        } else {
+          ratingEl.style.display = 'none';
+        }
+
+        document.getElementById('modalTags').innerHTML = item.genres.map(g => `<span class="modal-genre-tag">${g}</span>`).join('');
+
+        document.getElementById('modalPlayBtn').onclick = () => {
+          document.getElementById('detailsModal').classList.remove('active');
+          this.openPlayer(item);
+        };
+
+        const favBtn = document.getElementById('modalFavBtn');
+        const isFav = Storage.isFavorite(item.id);
+        favBtn.classList.toggle('active', isFav);
+
+        favBtn.onclick = () => {
+          const added = Storage.toggleFavorite(item);
+          favBtn.classList.toggle('active', added);
+          UI.showToast(added ? 'Saved to My List!' : 'Removed from My List.');
+        };
+
+        document.getElementById('detailsModal').classList.add('active');
+      },
+
+      updatePlayerStreamUrl(item, season, episode) {
+        const prov = PROVIDERS[AppState.currentServer] || PROVIDERS.vidrock;
+        const iframe = document.getElementById('vidrockIframe');
+
+        if (item.format === 'movie') {
+          iframe.src = prov.buildMovieUrl(item.id);
+          document.getElementById('playerTitle').textContent = `Now Playing: ${item.title} (${prov.name})`;
+        } else {
+          iframe.src = prov.buildTvUrl(item.id, season, episode);
+          document.getElementById('playerTitle').textContent = `Now Playing: ${item.title} — S${season}:E${episode} (${prov.name})`;
+        }
+      },
+
+      async openPlayer(item, season = 1, episode = 1) {
+        AppState.currentPlayingItem = item;
+        AppState.currentSeason = Number(season);
+        AppState.currentEpisode = Number(episode);
+
+        const seriesControls = document.getElementById('seriesControls');
+
+        if (item.format === 'movie') {
+          seriesControls.style.display = 'none';
+        } else {
+          seriesControls.style.display = 'block';
+          this.setupSeriesControls(item, AppState.currentSeason, AppState.currentEpisode);
+        }
+
+        this.updatePlayerStreamUrl(item, AppState.currentSeason, AppState.currentEpisode);
+
+        document.getElementById('playerItemTitle').textContent = item.title;
+        document.getElementById('playerSynopsis').textContent = item.overview;
+        document.getElementById('playerYearBadge').textContent = item.year;
+        document.getElementById('playerTypeBadge').textContent = item.badgeText;
+
+        const ratingEl = document.getElementById('playerRatingBadge');
+        if (item.rating) {
+          ratingEl.style.display = 'inline-flex';
+          ratingEl.textContent = `★ ${item.rating}`;
+        } else {
+          ratingEl.style.display = 'none';
+        }
+
+        const favToggleBtn = document.getElementById('playerFavToggleBtn');
+        const updateFavState = () => {
+          const fav = Storage.isFavorite(item.id);
+          favToggleBtn.innerHTML = fav ? 'Remove from My List' : 'Save to My List';
+        };
+        updateFavState();
+        favToggleBtn.onclick = () => {
+          Storage.toggleFavorite(item);
+          updateFavState();
+        };
+
+        Storage.addToHistory(item, AppState.currentSeason, AppState.currentEpisode);
+        Storage.updateContinueWatching(item, AppState.currentSeason, AppState.currentEpisode);
+
+        document.getElementById('playerView').classList.add('active');
+        document.body.style.overflow = 'hidden';
+      },
+
+      async setupSeriesControls(item, currentSeason, currentEpisode) {
+        const select = document.getElementById('seasonSelector');
+        const countBadge = document.getElementById('seriesEpisodeCountBadge');
+        select.innerHTML = '<option>Loading seasons...</option>';
+
+        const tvData = await MediaService.fetchTvDetails(item.id);
+        select.innerHTML = '';
+
+        let validSeasons = [];
+        if (tvData && Array.isArray(tvData.seasons)) {
+          validSeasons = tvData.seasons.filter(s => s.season_number > 0);
+          if (validSeasons.length === 0) validSeasons = tvData.seasons;
+        }
+
+        if (validSeasons.length === 0) {
+          for (let s = 1; s <= (item.seasons || 3); s++) {
+            validSeasons.push({ season_number: s, episode_count: 12, name: `Season ${s}` });
+          }
+        }
+
+        validSeasons.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s.season_number;
+          opt.textContent = s.name || `Season ${s.season_number}`;
+          opt.dataset.episodes = s.episode_count || 12;
+          if (s.season_number === Number(currentSeason)) opt.selected = true;
+          select.appendChild(opt);
+        });
+
+        const renderEpisodesForSeason = (seasonNum) => {
+          const epGrid = document.getElementById('episodesGrid');
+          epGrid.innerHTML = '';
+
+          const selectedOption = select.options[select.selectedIndex];
+          const epCount = selectedOption ? Number(selectedOption.dataset.episodes) : 12;
+          countBadge.textContent = `${epCount} Available Episodes`;
+
+          for (let ep = 1; ep <= epCount; ep++) {
+            const btn = document.createElement('button');
+            btn.className = `episode-btn ${ep === Number(currentEpisode) && Number(seasonNum) === Number(AppState.currentSeason) ? 'active' : ''}`;
+            btn.textContent = `EP ${ep}`;
+            btn.onclick = () => {
+              AppState.currentSeason = Number(seasonNum);
+              AppState.currentEpisode = Number(ep);
+              this.openPlayer(item, seasonNum, ep);
+            };
+            epGrid.appendChild(btn);
+          }
+        };
+
+        renderEpisodesForSeason(currentSeason);
+        select.onchange = (e) => renderEpisodesForSeason(e.target.value);
+      },
+
+      closePlayer() {
+        document.getElementById('vidrockIframe').src = '';
+        document.getElementById('playerView').classList.remove('active');
+        document.body.style.overflow = 'auto';
+        if (AppState.activeView === 'home') {
+          UI.renderHomeRows();
+        }
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => App.init());
+  </script>
+</body>
+</html>
